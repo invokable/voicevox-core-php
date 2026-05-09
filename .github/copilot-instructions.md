@@ -44,5 +44,5 @@ PHP版のための調査結果。これを元に実装する。
 
 ## コーディングガイドライン
 
-- VOICEVOXコア公式のPython版(blocking.py)を参考にクラス名、メソッド名を揃え忠実に移植する。
+- VOICEVOXコア公式のPython版(blocking.py)を参考にクラス名、メソッド名を揃え忠実に移植する。メソッド名はPythonのスネークケース、PHPはキャメルケースなので一般的な慣習に合わせる。
 - 使いやすさは別途 [Laravel版パッケージ](https://github.com/invokable/laravel-voicevox) が担当する。
