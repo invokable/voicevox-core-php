@@ -32,7 +32,7 @@ Pure PHP用パッケージなのでフレームワークには依存しない。
 
 - src/
 - headers/voicevox_core_ffi.h 
-- scripts/ 公式のvoicevox_core.hをPHP用のvoicevox_core_ffi.hに変換するPHPスクリプト
+- scripts/ 公式の[voicevox_core.h](../voicevox_core/crates/voicevox_core_c_api/include/voicevox_core.h)をPHP用のvoicevox_core_ffi.hに変換するPHPスクリプト
 - tests/
 - voicevox_core/ 公式のgit submodule
 
