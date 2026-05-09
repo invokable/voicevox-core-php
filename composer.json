@@ -1,0 +1,50 @@
+{
+    "name": "revolution/voicevox-core",
+    "description": "VOICEVOX Core",
+    "keywords": [
+        "voicevox"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "ext-ffi": "*"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.22",
+        "pestphp/pest": "^4.1",
+        "laravel/pao": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Revolution\\Voicevox\\Core\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kawax",
+            "email": "kawaxbiz@gmail.com"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "scripts": {
+        "test": "vendor/bin/pest --compact --parallel",
+        "test:coverage": "pest --compact --parallel --coverage --coverage-clover build/logs/clover.xml",
+        "lint": [
+            "vendor/bin/pint --parallel"
+        ],
+        "lint:check": [
+            "vendor/bin/pint --parallel --test"
+        ]
+    }
+}
