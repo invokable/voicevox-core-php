@@ -13,3 +13,4 @@ phpunit.xml export-ignore
 pint.json export-ignore
 /scripts export-ignore
 /docs export-ignore
+/voicevox_core export-ignore
