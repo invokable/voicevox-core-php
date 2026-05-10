@@ -18,7 +18,7 @@ env:
 jobs:
   integration:
     runs-on: ubuntu-latest
-    name: PHP 8.3 integration
+    name: PHP integration
 
     steps:
       - name: Checkout code
@@ -27,7 +27,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
           extensions: ffi, mbstring
           coverage: none
           ini-values: ffi.enable=1
@@ -92,3 +92,9 @@ jobs:
 
       - name: Execute integration tests
         run: composer run test:integration
+
+      - name: Code Coverage
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          oidc: true
+          files: build/logs/clover.xml
