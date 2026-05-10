@@ -33,7 +33,7 @@ typedef uint32_t VoicevoxStyleId;
 
 /* ---- Concrete structs ---- */
 typedef struct VoicevoxLoadOnnxruntimeOptions {
-    char *filename;
+    const char *filename;
 } VoicevoxLoadOnnxruntimeOptions;
 
 typedef struct VoicevoxInitializeOptions {
