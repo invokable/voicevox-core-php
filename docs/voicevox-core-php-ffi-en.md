@@ -645,11 +645,11 @@ php your_script.php
 
 ### Library Search Path
 
-| OS | Search Location | Override |
-|----|----------------|---------|
-| Linux | `/usr/lib`, `/usr/local/lib` | `LD_LIBRARY_PATH` |
-| macOS | `/usr/local/lib`, `/opt/homebrew/lib` | `DYLD_LIBRARY_PATH` |
-| Windows | `PATH` directories | Absolute path in `FFI::cdef()` |
+| OS      | Search Location                       | Override                                          |
+|---------|---------------------------------------|---------------------------------------------------|
+| Linux   | `/usr/lib`, `/usr/local/lib`          | `LD_LIBRARY_PATH`                                 |
+| macOS   | `/usr/local/lib`, `/opt/homebrew/lib` | `DYLD_LIBRARY_PATH`, `DYLD_FALLBACK_LIBRARY_PATH` |
+| Windows | `PATH` directories                    | Absolute path in `FFI::cdef()`                    |
 
 **Recommendation**: Always use absolute paths in `FFI::cdef()` to avoid search-path issues:
 ```php
