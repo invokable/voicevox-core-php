@@ -45,6 +45,11 @@ mv voicevox_core ~/.local/voicevox_core
 ln -s [VOICEVOX_CORE_DIR]/libvoicevox_core.dylib /usr/local/lib/libvoicevox_core.dylib
 ```
 
+`/usr/local/lib/`から読み込めない時は`.zshrc`などで`DYLD_FALLBACK_LIBRARY_PATH`を設定してください。
+```bash
+export DYLD_FALLBACK_LIBRARY_PATH="$HOME/lib:/usr/local/lib:/usr/lib"
+```
+
 **Linux:**
 ```bash
 ln -s [VOICEVOX_CORE_DIR]/libvoicevox_core.so /usr/local/lib/libvoicevox_core.so

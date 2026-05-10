@@ -45,6 +45,11 @@ Create a symlink so the library can be found automatically:
 ln -s [VOICEVOX_CORE_DIR]/libvoicevox_core.dylib /usr/local/lib/libvoicevox_core.dylib
 ```
 
+If you cannot load from `/usr/local/lib/`, set `DYLD_FALLBACK_LIBRARY_PATH` in your `.zshrc` file or similar.
+```bash
+export DYLD_FALLBACK_LIBRARY_PATH="$HOME/lib:/usr/local/lib:/usr/lib"
+```
+
 **Linux:**
 ```bash
 ln -s [VOICEVOX_CORE_DIR]/libvoicevox_core.so /usr/local/lib/libvoicevox_core.so
