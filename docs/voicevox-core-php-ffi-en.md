@@ -12,6 +12,7 @@ Implementing a PHP FFI wrapper for `VOICEVOX/voicevox_core` is **technically fea
 2. **ONNX Runtime must be loaded first**: The modern v0.16+ API requires loading `libonnxruntime` before `libvoicevox_core`, which requires an extra `FFI::cdef()` call.
 3. **`ffi.enable` must be set**: On web server SAPIs this requires OPcache preloading; CLI is straightforward.
 4. **NativePHP compatibility is limited**: The bundled PHP binary does not include FFI; a custom static-php-cli build is required.
+5. **PHP 8.5 changes `const char*` handling**: Functions returning `const char*` now return a PHP `string` instead of `FFI\CData`, and assigning a PHP `string` to a `const char*` struct field raises an exception. Declare such fields as `char*` in the FFI header and use a compat helper for return values.
 
 The implementation is entirely possible for CLI tools, local scripts, and custom desktop apps (via NativePHP with a custom PHP binary). Production web server deployment is more complex but possible with proper OPcache preloading.
 
@@ -356,6 +357,41 @@ PHP FFI supports `uint8_t[16]` but the pointer-to-array typedef syntax is proble
 The `bool` type from `<stdbool.h>` may need explicit declaration.
 
 **Fix**: Prepend `typedef _Bool bool;` if PHP FFI's version doesn't have `bool` built-in.
+
+### ⚠️ Issue 7: `const char*` Struct Fields (PHP 8.5+)
+
+PHP 8.5 changed how `const char*` is handled in FFI:
+
+- **Return values**: Functions returning `const char*` now return a PHP `string` directly instead of `FFI\CData`. Passing this to `FFI::string()` causes a `TypeError`.
+- **Struct field assignment**: Assigning a PHP `string` directly to a `const char*` struct field (e.g., `VoicevoxLoadOnnxruntimeOptions::filename`) throws `FFI\Exception: Incompatible types`.
+
+**Fix for return values**: Use a helper that checks the type before calling `FFI::string()`:
+```php
+public static function cstring(CData|string $ptr): string
+{
+    return is_string($ptr) ? $ptr : FFI::string($ptr);
+}
+```
+
+**Fix for struct field assignment**: Declare the field as `char*` instead of `const char*` in the FFI header, and assign via an unowned buffer:
+```php
+$len = strlen($filename);
+$buf = $ffi->new('char[' . ($len + 1) . ']', false);  // false = unowned
+FFI::memcpy($buf, $filename, $len);
+$opts->filename = $ffi->cast('char*', $buf);
+// ... use $opts ...
+FFI::free($buf);
+```
+
+> Note: Input string arguments to C functions (e.g., path parameters) still accept PHP strings directly and do not require this workaround.
+
+### ⚠️ Issue 8: Static FFI Method Deprecations (PHP 8.5+)
+
+PHP 8.5 deprecates calling certain `FFI` methods statically:
+- `FFI::new()` → use `$ffi->new()` (instance method on an FFI object)
+- `FFI::cast()` → use `$ffi->cast()`
+
+`FFI::string()`, `FFI::memcpy()`, `FFI::addr()`, and `FFI::free()` remain usable as static methods.
 
 ---
 

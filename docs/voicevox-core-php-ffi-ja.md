@@ -12,6 +12,7 @@
 2. **ONNXランタイムを先に読み込む必要がある**: 最新のv0.16+ APIでは `libvoicevox_core` より先に `libonnxruntime` を読み込む必要があり、追加の `FFI::cdef()` 呼び出しが必要です。
 3. **`ffi.enable` の設定が必要**: WebサーバーSAPIではOPcacheプリロードが必要ですが、CLIはそのまま使えます。
 4. **NativePHPとの互換性は限定的**: バンドルされているPHPバイナリにFFIは含まれておらず、`static-php-cli` でカスタムビルドが必要です。
+5. **PHP 8.5 の `const char*` 挙動の変更**: `const char*` を返す関数は `FFI\CData` でなく PHP の `string` を直接返すようになり、`const char*` 構造体フィールドへの PHP 文字列直接代入も例外が発生するようになりました。FFIヘッダでは該当フィールドを `char*` として宣言し、戻り値は互換ヘルパーを使用します。
 
 CLIツール・ローカルスクリプト・カスタムデスクトップアプリ（カスタムPHPバイナリを使用したNativePHP経由）での実装は十分可能です。本番Webサーバーへのデプロイはより複雑ですが、OPcacheプリロードを適切に設定すれば実現できます。
 
@@ -358,6 +359,41 @@ PHP FFIは `uint8_t[16]` をサポートしますが、配列へのポインタt
 `<stdbool.h>` からの `bool` 型は明示的な宣言が必要な場合があります。
 
 **対処法**: PHP FFIに `bool` が組み込まれていない場合は `typedef _Bool bool;` を追加します。
+
+### ⚠️ 問題7: `const char*` 構造体フィールド（PHP 8.5以降）
+
+PHP 8.5 では FFI の `const char*` の扱いが変わりました：
+
+- **戻り値**: `const char*` を返す関数は、`FFI\CData` ではなく PHP の `string` を直接返すようになりました。これを `FFI::string()` に渡すと `TypeError` が発生します。
+- **構造体フィールドへの代入**: `const char*` 型の構造体フィールド（例: `VoicevoxLoadOnnxruntimeOptions::filename`）へ PHP の `string` を直接代入すると `FFI\Exception: Incompatible types` が発生します。
+
+**戻り値の対処法**: 型を確認してから `FFI::string()` を呼ぶヘルパーを用意します：
+```php
+public static function cstring(CData|string $ptr): string
+{
+    return is_string($ptr) ? $ptr : FFI::string($ptr);
+}
+```
+
+**構造体フィールド代入の対処法**: FFIヘッダで該当フィールドを `const char*` ではなく `char*` として宣言し、アンオーンドバッファ経由で代入します：
+```php
+$len = strlen($filename);
+$buf = $ffi->new('char[' . ($len + 1) . ']', false);  // false = アンオーンド
+FFI::memcpy($buf, $filename, $len);
+$opts->filename = $ffi->cast('char*', $buf);
+// ... $opts を使用 ...
+FFI::free($buf);
+```
+
+> 注意: C関数へのパス等の入力文字列引数は引き続き PHP の `string` をそのまま渡せます。この対処法は不要です。
+
+### ⚠️ 問題8: FFI静的メソッドのdeprecated（PHP 8.5以降）
+
+PHP 8.5 では以下の `FFI` メソッドの静的呼び出しが非推奨（deprecated）になりました：
+- `FFI::new()` → FFIオブジェクトのインスタンスメソッド `$ffi->new()` を使用
+- `FFI::cast()` → `$ffi->cast()` を使用
+
+`FFI::string()`、`FFI::memcpy()`、`FFI::addr()`、`FFI::free()` は引き続き静的メソッドとして使用可能です。
 
 ---
 
