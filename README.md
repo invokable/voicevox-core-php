@@ -25,14 +25,14 @@ This library requires the VOICEVOX Core dynamic library (`.so` / `.dylib`), the 
 Download the appropriate downloader for your OS and architecture from [voicevox_core releases](https://github.com/VOICEVOX/voicevox_core/releases) and run it. This creates a `voicevox_core` directory in the current directory containing:
 
 - `dict/open_jtalk_dic_*/` — OpenJTalk dictionary
-- `c_api/lib/`` — Dynamic library file (`.so`, `.dylib`, or `.dll`)
+- `c_api/lib/` — Dynamic library file (`.so`, `.dylib`, or `.dll`)
 - `models/` — compressed model files (`.vvm`)
 - `onnxruntime/` — ONNX Runtime library
 
 ### 2. Move to a permanent location
 
 ```bash
-mv voicevox_core_* ~/.local/voicevox_core
+mv voicevox_core ~/.local/voicevox_core
 ```
 
 ### 3. Create a symlink (Recommended)
