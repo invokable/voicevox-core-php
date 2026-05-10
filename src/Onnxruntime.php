@@ -45,12 +45,20 @@ class Onnxruntime
 
         $opts = $ffi->voicevox_make_default_load_onnxruntime_options();
 
+        $filenameBuf = null;
         if ($filename !== '') {
-            $opts->filename = $filename;
+            $len = strlen($filename);
+            $filenameBuf = $ffi->new('char['.($len + 1).']', false);
+            FFI::memcpy($filenameBuf, $filename, $len);
+            $opts->filename = $ffi->cast('char*', $filenameBuf);
         }
 
         $ortPtr = $ffi->new('struct VoicevoxOnnxruntime*');
         $result = $ffi->voicevox_onnxruntime_load_once($opts, FFI::addr($ortPtr));
+
+        if ($filenameBuf !== null) {
+            FFI::free($filenameBuf);
+        }
 
         VoicevoxResultCode::check($result, $ffi);
 
