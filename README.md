@@ -2,6 +2,8 @@
 
 PHP FFI wrapper for [VOICEVOX Core](https://github.com/VOICEVOX/voicevox_core) — the text-to-speech engine library from the VOICEVOX project.
 
+This is a package for pure PHP. For general use, the [Laravel version](https://github.com/invokable/laravel-voicevox) is recommended.
+
 ## Requirements
 
 - PHP 8.3+
