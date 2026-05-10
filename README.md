@@ -22,7 +22,7 @@ This library requires the VOICEVOX Core dynamic library (`.so` / `.dylib`), the 
 
 ### 1. Download voicevox_core
 
-Download the appropriate downloader for your OS and architecture from [voicevox_core releases](https://github.com/VOICEVOX/voicevox_core/releases) and run it. This creates a `voicevox_core_*` directory in the current directory containing:
+Download the appropriate downloader for your OS and architecture from [voicevox_core releases](https://github.com/VOICEVOX/voicevox_core/releases) and run it. This creates a `voicevox_core` directory in the current directory containing:
 
 - `dict/open_jtalk_dic_*/` — OpenJTalk dictionary
 - `c_api/lib/`` — Dynamic library file (`.so`, `.dylib`, or `.dll`)
