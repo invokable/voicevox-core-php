@@ -40,7 +40,7 @@
     "scripts": {
         "test": "vendor/bin/pest --compact --parallel --testsuite=Unit",
         "test:coverage": "pest --compact --parallel --testsuite=Unit --coverage --coverage-clover build/logs/clover.xml",
-        "test:integration": "vendor/bin/pest --compact --testsuite=Integration",
+        "test:integration": "vendor/bin/pest --compact --testsuite=Integration --coverage --coverage-clover build/logs/clover.xml",
         "lint": [
             "vendor/bin/pint --parallel"
         ],
