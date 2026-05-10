@@ -33,6 +33,7 @@ Pure PHP用パッケージなのでフレームワークには依存しない。
 - src/
 - headers/voicevox_core_ffi.h 
 - tests/
+- example/ サンプルコード。開発時の手動テスト用。
 - voicevox_core/ 公式のgit submodule
 
 ## 資料
