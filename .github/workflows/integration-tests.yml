@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   VOICEVOX_CORE_VERSION: 0.16.4
