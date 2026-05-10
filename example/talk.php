@@ -20,7 +20,9 @@ $vvmPath = $voicevoxCoreDir.'/models/vvms/0.vvm';
 $text = 'この音声は、ボイスボックスを使用して、出力されています。';
 $styleId = 0;
 $outPath = './build/talk.wav';
-mkdir('./build/');
+if (! is_dir('./build')) {
+    mkdir('./build', 0777, true);
+}
 
 // 初期化
 $onnxruntime = Onnxruntime::loadOnce($onnxruntimeFilename);
