@@ -11,11 +11,11 @@ use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 /**
  * テキスト解析器としてのOpen JTalk。
  */
-class OpenJtalk
+readonly class OpenJtalk
 {
-    private readonly CData $handle;
+    private CData $handle;
 
-    private readonly FFI $ffi;
+    private FFI $ffi;
 
     /**
      * @param  string  $openJtalkDictDir  Open JTalkの辞書ディレクトリ。

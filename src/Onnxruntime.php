@@ -16,10 +16,10 @@ use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 class Onnxruntime
 {
     /** ONNX Runtimeのライブラリ名。 */
-    public const LIB_NAME = 'voicevox_onnxruntime';
+    public const string LIB_NAME = 'voicevox_onnxruntime';
 
     /** 推奨されるONNX Runtimeのバージョン。 */
-    public const LIB_VERSION = '1.17.3';
+    public const string LIB_VERSION = '1.17.3';
 
     private static ?self $instance = null;
 
