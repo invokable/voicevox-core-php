@@ -652,11 +652,11 @@ php your_script.php
 
 ### ライブラリ検索パス
 
-| OS | デフォルト検索場所 | 上書き方法 |
-|----|----------------|---------|
-| Linux | `/usr/lib`、`/usr/local/lib` | `LD_LIBRARY_PATH` |
-| macOS | `/usr/local/lib`、`/opt/homebrew/lib` | `DYLD_LIBRARY_PATH` |
-| Windows | `PATH` のディレクトリ | `FFI::cdef()` に絶対パスを指定 |
+| OS      | デフォルト検索場所                            | 上書き方法                                             |
+|---------|--------------------------------------|---------------------------------------------------|
+| Linux   | `/usr/lib`、`/usr/local/lib`          | `LD_LIBRARY_PATH`                                 |
+| macOS   | `/usr/local/lib`、`/opt/homebrew/lib` | `DYLD_LIBRARY_PATH`, `DYLD_FALLBACK_LIBRARY_PATH` |
+| Windows | `PATH` のディレクトリ                       | `FFI::cdef()` に絶対パスを指定                            |
 
 **推奨**: `FFI::cdef()` に絶対パスを使用してサーチパス問題を回避する：
 ```php
