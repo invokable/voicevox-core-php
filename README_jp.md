@@ -117,6 +117,12 @@ echo 'Wrote ' . $outPath . PHP_EOL;
 php talk.php
 ```
 
+## テスト
+
+- `composer run test` はデフォルトの `Unit` testsuite だけを実行します。
+- 実ランタイムに依存するテストは `tests/Integration` に分離してあり、通常実行には含まれません。
+- 実行する場合は `VOICEVOX_CORE_TEST_ROOT` を設定したうえで `vendor/bin/pest --compact --testsuite=Integration`（または `composer run test:integration`）を使ってください。GitHub Actions では専用の `.github/workflows/integration-tests.yml` workflow から実行します。
+
 ## APIリファレンス
 
 ### `Onnxruntime`

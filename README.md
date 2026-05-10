@@ -117,6 +117,12 @@ Run with:
 php talk.php
 ```
 
+## Testing
+
+- `composer run test` runs the default `Unit` testsuite only.
+- Runtime-backed tests live in `tests/Integration` and are excluded from the default run.
+- Run them explicitly with `vendor/bin/pest --compact --testsuite=Integration` (or `composer run test:integration`) after setting `VOICEVOX_CORE_TEST_ROOT`. GitHub Actions uses the dedicated `.github/workflows/integration-tests.yml` workflow for this suite.
+
 ## API Reference
 
 ### `Onnxruntime`

@@ -1,0 +1,77 @@
+name: integration tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VOICEVOX_CORE_VERSION: 0.16.4
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    name: PHP 8.3 integration
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: ffi, mbstring
+          coverage: none
+          ini-values: ffi.enable=1
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Download VOICEVOX Core Linux runtime
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          asset="voicevox_core-linux-x64-${VOICEVOX_CORE_VERSION}.zip"
+          archive_dir="$PWD/.artifacts"
+          extract_dir="$PWD/.voicevox-runtime"
+
+          mkdir -p "$archive_dir" "$extract_dir"
+          gh release download "$VOICEVOX_CORE_VERSION" \
+            --repo VOICEVOX/voicevox_core \
+            --pattern "$asset" \
+            --dir "$archive_dir"
+
+          unzip -q "$archive_dir/$asset" -d "$extract_dir"
+
+          if [ -d "$extract_dir/voicevox_core" ]; then
+            root="$extract_dir/voicevox_core"
+          else
+            candidate="$(find "$extract_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+            if [ -n "$candidate" ] && [ -d "$candidate/c_api" ]; then
+              root="$candidate"
+            else
+              root="$extract_dir"
+            fi
+          fi
+
+          test -f "$root/c_api/lib/libvoicevox_core.so"
+          test -d "$root/onnxruntime/lib"
+          test -d "$root/dict"
+          test -f "$root/models/vvms/0.vvm"
+
+          {
+            echo "VOICEVOX_CORE_TEST_ROOT=$root"
+            echo "VOICEVOX_CORE_LIB_PATH=$root/c_api/lib/libvoicevox_core.so"
+            echo "LD_LIBRARY_PATH=$root/c_api/lib:$root/onnxruntime/lib:$root/additional_libraries${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          } >> "$GITHUB_ENV"
+
+      - name: Execute integration tests
+        run: composer run test:integration
