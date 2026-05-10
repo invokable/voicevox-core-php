@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Revolution\Voicevox\Core;
 
 use FFI;
+use FFI\CData;
 
 class VoicevoxFFI
 {
@@ -19,6 +20,15 @@ class VoicevoxFFI
             file_get_contents(__DIR__.'/../headers/voicevox_core_ffi.h'),
             self::getLibraryPath(),
         );
+    }
+
+    /**
+     * PHP 8.5+ は const char* の戻り値を自動的に PHP string に変換する。
+     * それ以前のバージョンでは FFI\CData が返る。両方に対応するヘルパー。
+     */
+    public static function cstring(CData|string $ptr): string
+    {
+        return is_string($ptr) ? $ptr : FFI::string($ptr);
     }
 
     /**

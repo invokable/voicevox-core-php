@@ -6,6 +6,7 @@ namespace Revolution\Voicevox\Core\Enums;
 
 use FFI;
 use Revolution\Voicevox\Core\Exception\VoicevoxException;
+use Revolution\Voicevox\Core\VoicevoxFFI;
 
 enum VoicevoxResultCode: int
 {
@@ -110,7 +111,7 @@ enum VoicevoxResultCode: int
     public static function check(int $code, FFI $ffi): void
     {
         if ($code !== self::Ok->value) {
-            $message = FFI::string($ffi->voicevox_error_result_to_message($code));
+            $message = VoicevoxFFI::cstring($ffi->voicevox_error_result_to_message($code));
             throw new VoicevoxException($message, $code);
         }
     }

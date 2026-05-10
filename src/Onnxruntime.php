@@ -45,12 +45,20 @@ class Onnxruntime
 
         $opts = $ffi->voicevox_make_default_load_onnxruntime_options();
 
+        $filenameBuf = null;
         if ($filename !== '') {
-            $opts->filename = $filename;
+            $len = strlen($filename);
+            $filenameBuf = $ffi->new('char['.($len + 1).']', false);
+            FFI::memcpy($filenameBuf, $filename, $len);
+            $opts->filename = $ffi->cast('char*', $filenameBuf);
         }
 
         $ortPtr = $ffi->new('struct VoicevoxOnnxruntime*');
         $result = $ffi->voicevox_onnxruntime_load_once($opts, FFI::addr($ortPtr));
+
+        if ($filenameBuf !== null) {
+            FFI::free($filenameBuf);
+        }
 
         VoicevoxResultCode::check($result, $ffi);
 
@@ -104,7 +112,7 @@ class Onnxruntime
      */
     public static function libVersionedFilename(): string
     {
-        return FFI::string(VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_versioned_filename());
+        return VoicevoxFFI::cstring(VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_versioned_filename());
     }
 
     /**
@@ -112,7 +120,7 @@ class Onnxruntime
      */
     public static function libUnversionedFilename(): string
     {
-        return FFI::string(VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_unversioned_filename());
+        return VoicevoxFFI::cstring(VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_unversioned_filename());
     }
 
     public function handle(): CData

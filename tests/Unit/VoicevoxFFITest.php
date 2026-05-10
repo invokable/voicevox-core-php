@@ -6,6 +6,9 @@ use Revolution\Voicevox\Core\VoicevoxFFI;
 
 describe('VoicevoxFFI', function () {
     it('returns correct library name for current OS', function () {
+        $original = getenv('VOICEVOX_CORE_LIB_PATH');
+        putenv('VOICEVOX_CORE_LIB_PATH');
+
         $path = VoicevoxFFI::getLibraryPath();
 
         $expected = match (PHP_OS_FAMILY) {
@@ -15,6 +18,10 @@ describe('VoicevoxFFI', function () {
         };
 
         expect($path)->toBe($expected);
+
+        if ($original !== false) {
+            putenv("VOICEVOX_CORE_LIB_PATH={$original}");
+        }
     });
 
     it('uses VOICEVOX_CORE_LIB_PATH env variable when set', function () {
