@@ -1,5 +1,11 @@
 # VOICEVOX Core for PHP
 
+[![tests](https://github.com/invokable/voicevox-core-php/actions/workflows/tests.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/tests.yml)
+[![integration tests](https://github.com/invokable/voicevox-core-php/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/integration-tests.yml)
+[![linter](https://github.com/invokable/voicevox-core-php/actions/workflows/lint.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/lint.yml)
+[![Maintainability](https://qlty.sh/gh/invokable/projects/voicevox-core-php/maintainability.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
+[![Code Coverage](https://qlty.sh/gh/invokable/projects/voicevox-core-php/coverage.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
+
 [VOICEVOX Core](https://github.com/VOICEVOX/voicevox_core)のPHP FFIラッパーです。VOICEVOXプロジェクトのテキスト音声合成エンジンライブラリをPHPから利用できます。
 
 これはPure PHP用のパッケージです。一般的な用途には [Laravel版](https://github.com/invokable/laravel-voicevox) が推奨です。
