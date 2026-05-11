@@ -189,13 +189,14 @@ describe('VOICEVOX runtime integration', function () {
         $userDict = new UserDict;
         $accentType = 2;
         $wordUuid = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
-        expect($userDict->toJson())->toContain('テストタンゴ');
+        expect($wordUuid)->toHaveLength(32)
+            ->and($userDict->toJson())->toContain('テストタンゴ');
 
         $updatedPronunciation = 'テストワード';
         $userDict->updateWord($wordUuid, 'テスト単語', $updatedPronunciation, $accentType);
         expect($userDict->toJson())->toContain($updatedPronunciation);
 
-        $userDictPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
+        $userDictPath = sys_get_temp_dir().'/voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
 
         try {
             $userDict->save($userDictPath);
@@ -210,8 +211,7 @@ describe('VOICEVOX runtime integration', function () {
             $openJtalk->useUserDict($importedDict);
 
             $json = $importedDict->toJson();
-            expect($json)->toContain('テスト単語')
-                ->and($wordUuid)->toHaveLength(32);
+            expect($json)->toContain('テスト単語');
 
             $importedDict->removeWord($wordUuid);
             expect($importedDict->toJson())->not->toContain('テスト単語');
