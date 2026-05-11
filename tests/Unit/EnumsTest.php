@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Revolution\Voicevox\Core\Enums\AccelerationMode;
 use Revolution\Voicevox\Core\Enums\UserDictWordType;
 use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
-use Revolution\Voicevox\Core\Exception\VoicevoxException;
+use Revolution\Voicevox\Core\Exceptions\VoicevoxException;
 
 describe('AccelerationMode', function () {
     it('has correct values', function () {

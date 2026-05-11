@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Revolution\Voicevox\Core\Exception;
+namespace Revolution\Voicevox\Core\Exceptions;
 
 use RuntimeException;
 

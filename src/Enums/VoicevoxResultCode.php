@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Revolution\Voicevox\Core\Enums;
 
 use FFI;
-use Revolution\Voicevox\Core\Exception\VoicevoxException;
+use Revolution\Voicevox\Core\Exceptions\VoicevoxException;
 
 enum VoicevoxResultCode: int
 {
