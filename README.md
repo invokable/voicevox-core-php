@@ -1,5 +1,11 @@
 # VOICEVOX Core for PHP
 
+[![tests](https://github.com/invokable/voicevox-core-php/actions/workflows/tests.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/tests.yml)
+[![integration tests](https://github.com/invokable/voicevox-core-php/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/integration-tests.yml)
+[![linter](https://github.com/invokable/voicevox-core-php/actions/workflows/lint.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/lint.yml)
+[![Maintainability](https://qlty.sh/gh/invokable/projects/voicevox-core-php/maintainability.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
+[![Code Coverage](https://qlty.sh/gh/invokable/projects/voicevox-core-php/coverage.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
+
 PHP FFI wrapper for [VOICEVOX Core](https://github.com/VOICEVOX/voicevox_core) — the text-to-speech engine library from the VOICEVOX project.
 
 This is a package for pure PHP. For general use, the [Laravel version](https://github.com/invokable/laravel-voicevox) is recommended.
