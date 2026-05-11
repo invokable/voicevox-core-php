@@ -6,7 +6,7 @@
 [![Maintainability](https://qlty.sh/gh/invokable/projects/voicevox-core-php/maintainability.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
 [![Code Coverage](https://qlty.sh/gh/invokable/projects/voicevox-core-php/coverage.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
 
-PHP FFI wrapper for [VOICEVOX Core](https://github.com/VOICEVOX/voicevox_core) — the text-to-speech engine library from the VOICEVOX project.
+PHP FFI wrapper for [VOICEVOX CORE](https://github.com/VOICEVOX/voicevox_core) — the text-to-speech engine library from the VOICEVOX project.
 
 This is a package for pure PHP. For general use, the [Laravel version](https://github.com/invokable/laravel-voicevox) is recommended.
 
@@ -14,6 +14,7 @@ This is a package for pure PHP. For general use, the [Laravel version](https://g
 
 - PHP 8.3+
 - `ext-ffi` extension enabled
+- VOICEVOX CORE 0.16+
 
 > [!NOTE]
 > PHP FFI is typically disabled in web server environments (e.g., FPM with `ffi.enable=false`). This library is intended for **local CLI use only**.
@@ -26,7 +27,7 @@ composer require revolution/voicevox-core
 
 ## Library Setup (Linux / macOS)
 
-This library requires the VOICEVOX Core dynamic library (`.so` / `.dylib`), the ONNX Runtime library, and the OpenJTalk dictionary.
+This package requires the VOICEVOX CORE dynamic library (`.so` / `.dylib`), the ONNX Runtime library, and the OpenJTalk dictionary.
 
 ### 1. Download voicevox_core
 
