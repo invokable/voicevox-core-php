@@ -189,16 +189,20 @@ describe('VOICEVOX runtime integration', function () {
         $userDict = new UserDict;
         $accentType = 2;
         $wordUuid = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
-        $userDict->updateWord($wordUuid, 'テスト単語', 'テストタンゴ', $accentType);
+        expect($userDict->toJson())->toContain('テストタンゴ');
 
-        $dictPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
+        $updatedPronunciation = 'テストワード';
+        $userDict->updateWord($wordUuid, 'テスト単語', $updatedPronunciation, $accentType);
+        expect($userDict->toJson())->toContain($updatedPronunciation);
+
+        $userDictPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
 
         try {
-            $userDict->save($dictPath);
-            expect(file_exists($dictPath))->toBeTrue();
+            $userDict->save($userDictPath);
+            expect(file_exists($userDictPath))->toBeTrue();
 
             $loadedDict = new UserDict;
-            $loadedDict->load($dictPath);
+            $loadedDict->load($userDictPath);
 
             $importedDict = new UserDict;
             $importedDict->importDict($loadedDict);
@@ -210,9 +214,10 @@ describe('VOICEVOX runtime integration', function () {
                 ->and($wordUuid)->toHaveLength(32);
 
             $importedDict->removeWord($wordUuid);
+            expect($importedDict->toJson())->not->toContain('テスト単語');
         } finally {
-            if (file_exists($dictPath)) {
-                unlink($dictPath);
+            if (file_exists($userDictPath)) {
+                unlink($userDictPath);
             }
         }
     });
