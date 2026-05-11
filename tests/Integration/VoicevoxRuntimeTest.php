@@ -188,20 +188,24 @@ describe('VOICEVOX runtime integration', function () {
 
         $userDict = new UserDict;
         $accentType = 2;
-        $wordUuid = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
+        $wordId = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
         $initialJson = $userDict->toJson();
-        expect($wordUuid)->toHaveLength(32)
+        expect($wordId)->toHaveLength(32)
             ->and($initialJson)->toContain('テスト単語')
             ->and($initialJson)->toContain('テストタンゴ')
             ->and($initialJson)->toContain('"accent_type":2');
 
         $updatedPronunciation = 'テストワード';
-        $userDict->updateWord($wordUuid, 'テスト単語', $updatedPronunciation, $accentType);
+        $userDict->updateWord($wordId, 'テスト単語', $updatedPronunciation, $accentType);
         $updatedJson = $userDict->toJson();
         expect($updatedJson)->toContain($updatedPronunciation)
             ->and($updatedJson)->not->toContain('テストタンゴ');
 
-        $userDictPath = sys_get_temp_dir().'/voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
+        $userDictPath = tempnam(sys_get_temp_dir(), 'voicevox-user-dict-');
+
+        if ($userDictPath === false) {
+            throw new RuntimeException('Could not create a temporary file path for user dictionary.');
+        }
 
         try {
             $userDict->save($userDictPath);
@@ -218,7 +222,7 @@ describe('VOICEVOX runtime integration', function () {
             $json = $importedDict->toJson();
             expect($json)->toContain('テスト単語');
 
-            $importedDict->removeWord($wordUuid);
+            $importedDict->removeWord($wordId);
             expect($importedDict->toJson())->not->toContain('テスト単語');
         } finally {
             if (file_exists($userDictPath)) {
