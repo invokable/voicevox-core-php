@@ -10,6 +10,8 @@ use Revolution\Voicevox\Core\OpenJtalk;
 use Revolution\Voicevox\Core\Synthesizer;
 use Revolution\Voicevox\Core\VoiceModelFile;
 
+// php ./example/song.php で実行
+
 // パス — voicevox_coreのインストール場所に合わせて変更してください
 $voicevoxCoreDir = getenv('HOME').'/.local/voicevox_core';
 $onnxruntimeFilename = $voicevoxCoreDir.'/onnxruntime/lib/'.Onnxruntime::libVersionedFilename();
