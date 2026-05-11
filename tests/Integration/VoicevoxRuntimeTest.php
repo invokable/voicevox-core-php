@@ -187,10 +187,11 @@ describe('VOICEVOX runtime integration', function () {
         ['openJtalk' => $openJtalk] = voicevoxRuntimeFixture();
 
         $userDict = new UserDict;
-        $wordUuid = $userDict->addWord('テスト単語', 'テストタンゴ', 2);
-        $userDict->updateWord($wordUuid, 'テスト単語', 'テストタンゴ', 2);
+        $accentType = 2;
+        $wordUuid = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
+        $userDict->updateWord($wordUuid, 'テスト単語', 'テストタンゴ', $accentType);
 
-        $dictPath = '/tmp/voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
+        $dictPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
 
         try {
             $userDict->save($dictPath);
