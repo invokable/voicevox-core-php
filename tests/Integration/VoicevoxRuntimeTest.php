@@ -189,12 +189,17 @@ describe('VOICEVOX runtime integration', function () {
         $userDict = new UserDict;
         $accentType = 2;
         $wordUuid = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
+        $initialJson = $userDict->toJson();
         expect($wordUuid)->toHaveLength(32)
-            ->and($userDict->toJson())->toContain('テストタンゴ');
+            ->and($initialJson)->toContain('テスト単語')
+            ->and($initialJson)->toContain('テストタンゴ')
+            ->and($initialJson)->toContain('"accent_type":2');
 
         $updatedPronunciation = 'テストワード';
         $userDict->updateWord($wordUuid, 'テスト単語', $updatedPronunciation, $accentType);
-        expect($userDict->toJson())->toContain($updatedPronunciation);
+        $updatedJson = $userDict->toJson();
+        expect($updatedJson)->toContain($updatedPronunciation)
+            ->and($updatedJson)->not->toContain('テストタンゴ');
 
         $userDictPath = sys_get_temp_dir().'/voicevox-user-dict-'.bin2hex(random_bytes(8)).'.json';
 
