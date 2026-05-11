@@ -154,11 +154,12 @@ describe('VOICEVOX runtime integration', function () {
 
     it('creates query variants and synthesizes wav data', function () {
         ['synthesizer' => $synthesizer] = voicevoxRuntimeFixture();
+        $kana = "コンニチワ'、ボイスボックス'デス。";
 
         $textAudioQuery = $synthesizer->createAudioQuery('こんにちは、VOICEVOXです。', 0);
-        $kanaAudioQuery = $synthesizer->createAudioQueryFromKana('コンニチワ、ボイスボックスデス。', 0);
+        $kanaAudioQuery = $synthesizer->createAudioQueryFromKana($kana, 0);
         $accentPhrases = $synthesizer->createAccentPhrases('こんにちは、VOICEVOXです。', 0);
-        $accentPhrasesFromKana = $synthesizer->createAccentPhrasesFromKana('コンニチワ、ボイスボックスデス。', 0);
+        $accentPhrasesFromKana = $synthesizer->createAccentPhrasesFromKana($kana, 0);
 
         $replacedMoraData = $synthesizer->replaceMoraData($accentPhrases, 0);
         $replacedPhonemeLength = $synthesizer->replacePhonemeLength($accentPhrases, 0);
@@ -166,7 +167,7 @@ describe('VOICEVOX runtime integration', function () {
 
         $synthesisWav = $synthesizer->synthesis($textAudioQuery, 0);
         $ttsWav = $synthesizer->tts('こんにちは、VOICEVOXです。', 0);
-        $ttsFromKanaWav = $synthesizer->ttsFromKana('コンニチワ、ボイスボックスデス。', 0);
+        $ttsFromKanaWav = $synthesizer->ttsFromKana($kana, 0);
 
         expect($textAudioQuery)->toContain('"accent_phrases"')
             ->and($kanaAudioQuery)->toContain('"accent_phrases"')
