@@ -24,7 +24,11 @@ Pure PHP用パッケージなのでフレームワークには依存しない。
 
 ## Command
 - `composer run test` - Run pest tests.
+- `composer run test:integration` - Run integration tests.
 - `composer run lint` - Run pint code formatter.
+
+クラウドエージェントや、ローカルでもCopilot CLIではVOICEVOX動的ライブラリが読み込めないので実際に音声合成を行うことはできない。  
+GitHub Actions専用に`test:integration`を用意しているのでテストだけ書いて動的ライブラリ込みのテスト実行はCIで行う。`.github/workflows/integration-tests.yml`
 
 ## ディレクトリ構成
 
