@@ -236,13 +236,13 @@ Hardware acceleration mode for the synthesizer.
 
 Word type for user dictionary entries.
 
-| Case | Value | Description |
-|------|-------|-------------|
-| `ProperNoun` | `0` | Proper noun (固有名詞) |
-| `CommonNoun` | `1` | Common noun (一般名詞) |
-| `Verb` | `2` | Verb (動詞) |
-| `Adjective` | `3` | Adjective (形容詞) |
-| `Suffix` | `4` | Suffix (接尾辞) |
+| Case         | Value | Description |
+|--------------|-------|-------------|
+| `ProperNoun` | `0`   | Proper noun |
+| `CommonNoun` | `1`   | Common noun |
+| `Verb`       | `2`   | Verb        |
+| `Adjective`  | `3`   | Adjective   |
+| `Suffix`     | `4`   | Suffix      |
 
 ---
 
