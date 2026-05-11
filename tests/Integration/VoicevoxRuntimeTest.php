@@ -223,7 +223,9 @@ describe('VOICEVOX runtime integration', function () {
             expect($json)->toContain('テスト単語');
 
             $importedDict->removeWord($wordId);
-            expect($importedDict->toJson())->not->toContain('テスト単語');
+            expect($importedDict->toJson())
+                ->not->toContain('テスト単語')
+                ->not->toContain('テストワード');
         } finally {
             if (file_exists($userDictPath)) {
                 unlink($userDictPath);
