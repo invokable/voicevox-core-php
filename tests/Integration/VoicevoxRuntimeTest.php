@@ -155,7 +155,7 @@ describe('VOICEVOX runtime integration', function () {
     it('creates query variants and synthesizes wav data', function () {
         ['synthesizer' => $synthesizer] = voicevoxRuntimeFixture();
         // AquesTalk-style kana requires accent markers (') in each accent phrase.
-        $kana = "コンニチワ'、ボイスボックス'デス。";
+        $kana = "コンニチワ'、ボイスボックス'デス";
 
         $textAudioQuery = $synthesizer->createAudioQuery('こんにちは、VOICEVOXです。', 0);
         $kanaAudioQuery = $synthesizer->createAudioQueryFromKana($kana, 0);
