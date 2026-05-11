@@ -6,7 +6,7 @@
 [![Maintainability](https://qlty.sh/gh/invokable/projects/voicevox-core-php/maintainability.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
 [![Code Coverage](https://qlty.sh/gh/invokable/projects/voicevox-core-php/coverage.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
 
-[VOICEVOX Core](https://github.com/VOICEVOX/voicevox_core)のPHP FFIラッパーです。VOICEVOXプロジェクトのテキスト音声合成エンジンライブラリをPHPから利用できます。
+[VOICEVOX CORE](https://github.com/VOICEVOX/voicevox_core)のPHP FFIラッパーです。VOICEVOXプロジェクトのテキスト音声合成エンジンライブラリをPHPから利用できます。
 
 これはPure PHP用のパッケージです。一般的な用途には [Laravel版](https://github.com/invokable/laravel-voicevox) が推奨です。
 
@@ -14,6 +14,7 @@
 
 - PHP 8.3以上
 - `ext-ffi` 拡張が有効であること
+- VOICEVOX CORE 0.16+
 
 > [!NOTE]
 > PHP FFIはWebサーバー環境（FPMなど）では無効にされていることが多いため（`ffi.enable=false`）、このライブラリは**ローカルCLIでの利用を想定**しています。
@@ -26,7 +27,7 @@ composer require revolution/voicevox-core
 
 ## ライブラリのセットアップ (Linux / macOS)
 
-本ライブラリを使用するには、VOICEVOX Coreの動的ライブラリ（`.so` / `.dylib`）、ONNX Runtime、OpenJTalk辞書が必要です。
+本パッケージを使用するには、VOICEVOX COREの動的ライブラリ（`.so` / `.dylib`）、ONNX Runtime、OpenJTalk辞書が必要です。
 
 ### 1. voicevox_coreのダウンロード
 
