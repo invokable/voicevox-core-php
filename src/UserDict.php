@@ -12,11 +12,11 @@ use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 /**
  * ユーザー辞書。
  */
-readonly class UserDict
+class UserDict
 {
-    private CData $handle;
+    private readonly CData $handle;
 
-    private FFI $ffi;
+    private readonly FFI $ffi;
 
     public function __construct()
     {

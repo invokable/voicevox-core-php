@@ -12,11 +12,11 @@ use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 /**
  * 音声シンセサイザ。
  */
-readonly class Synthesizer
+class Synthesizer
 {
-    private CData $handle;
+    private readonly CData $handle;
 
-    private FFI $ffi;
+    private readonly FFI $ffi;
 
     /**
      * @param  Onnxruntime  $onnxruntime  ONNX Runtime。

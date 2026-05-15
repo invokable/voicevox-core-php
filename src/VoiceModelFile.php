@@ -11,11 +11,11 @@ use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 /**
  * 音声モデルファイル。VVMファイルと対応する。
  */
-readonly class VoiceModelFile
+class VoiceModelFile
 {
     private function __construct(
-        private CData $handle,
-        private FFI $ffi,
+        private readonly CData $handle,
+        private readonly FFI $ffi,
     ) {}
 
     /**
