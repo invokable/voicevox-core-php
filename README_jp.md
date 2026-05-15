@@ -5,6 +5,7 @@
 [![linter](https://github.com/invokable/voicevox-core-php/actions/workflows/lint.yml/badge.svg)](https://github.com/invokable/voicevox-core-php/actions/workflows/lint.yml)
 [![Maintainability](https://qlty.sh/gh/invokable/projects/voicevox-core-php/maintainability.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
 [![Code Coverage](https://qlty.sh/gh/invokable/projects/voicevox-core-php/coverage.svg)](https://qlty.sh/gh/invokable/projects/voicevox-core-php)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/invokable/voicevox-core-php)
 
 [VOICEVOX CORE](https://github.com/VOICEVOX/voicevox_core)のPHP FFIラッパーです。VOICEVOXプロジェクトのテキスト音声合成エンジンライブラリをPHPから利用できます。
 
