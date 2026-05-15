@@ -27,8 +27,10 @@ Pure PHP用パッケージなのでフレームワークには依存しない。
 - `composer run test:integration` - Run integration tests.
 - `composer run lint` - Run pint code formatter.
 
-クラウドエージェントや、ローカルでもCopilot CLIではVOICEVOX動的ライブラリが読み込めないので実際に音声合成を行うことはできない。  
+クラウドエージェントではVOICEVOX動的ライブラリが読み込めないので実際に音声合成を行うことはできない。  
 GitHub Actions専用に`test:integration`を用意しているのでテストだけ書いて動的ライブラリ込みのテスト実行はCIで行う。`.github/workflows/integration-tests.yml`
+
+`VOICEVOX_CORE_LIB_PATH`で動的ライブラリを指定すればローカルのCopilot CLIでも読み込めそう。
 
 ## ディレクトリ構成
 
