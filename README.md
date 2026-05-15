@@ -75,6 +75,10 @@ If you cannot create a symlink, set the `VOICEVOX_CORE_LIB_PATH` environment var
 export VOICEVOX_CORE_LIB_PATH=/path/to/libvoicevox_core.dylib
 ```
 
+```bash
+export VOICEVOX_CORE_LIB_PATH="$HOME/.local/voicevox_core/c_api/lib/libvoicevox_core.dylib"
+```
+
 ## Usage Example
 
 The following `talk.php` demonstrates text-to-speech synthesis:
