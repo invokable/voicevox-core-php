@@ -75,6 +75,10 @@ ln -s [VOICEVOX_CORE_DIR]/libvoicevox_core.so /usr/local/lib/libvoicevox_core.so
 export VOICEVOX_CORE_LIB_PATH=/path/to/libvoicevox_core.dylib
 ```
 
+```bash
+export VOICEVOX_CORE_LIB_PATH="$HOME/.local/voicevox_core/c_api/lib/libvoicevox_core.dylib"
+```
+
 ## 使用例
 
 以下の `talk.php` はテキスト音声合成のサンプルコードです。
