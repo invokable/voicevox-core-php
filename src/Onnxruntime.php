@@ -29,6 +29,22 @@ class Onnxruntime
     ) {}
 
     /**
+     * 既存のポインタからインスタンスを生成する（内部用）。
+     *
+     * @internal
+     */
+    public static function fromPtr(CData $ptr, FFI $ffi): self
+    {
+        if (self::$instance !== null) {
+            return self::$instance;
+        }
+
+        self::$instance = new self($ptr, $ffi);
+
+        return self::$instance;
+    }
+
+    /**
      * ONNX Runtimeをロードして初期化する。
      *
      * 一度成功したら、以後は引数を無視して同じインスタンスを返す。

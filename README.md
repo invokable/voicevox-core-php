@@ -165,6 +165,7 @@ Text analyzer using OpenJTalk.
 | Method | Description |
 |--------|-------------|
 | `__construct(string $openJtalkDictDir)` | Initialize with the OpenJTalk dictionary directory path. |
+| `analyze(string $text): string` | Analyze Japanese text and return an accent phrase array as a JSON string. |
 | `useUserDict(UserDict $userDict): void` | Attach a user dictionary. Must be called again if the dictionary changes. |
 
 ---
@@ -189,6 +190,7 @@ Main text-to-speech synthesizer.
 | Method | Description |
 |--------|-------------|
 | `__construct(Onnxruntime $onnxruntime, OpenJtalk $openJtalk, AccelerationMode $accelerationMode = Auto, int $cpuNumThreads = 0)` | Initialize the synthesizer. |
+| `onnxruntime(): Onnxruntime` | Return the `Onnxruntime` instance held by this synthesizer. |
 | `isGpuMode(): bool` | Return whether GPU mode is active. |
 | `metas(): string` | Return loaded speaker metadata as a JSON string. |
 | `loadVoiceModel(VoiceModelFile $model): void` | Load a voice model. |
@@ -206,6 +208,27 @@ Main text-to-speech synthesizer.
 | `ttsFromKana(string $kana, int $styleId, bool $enableInterrogativeUpspeak = true): string` | Synthesize speech from kana notation. Returns WAV binary. |
 | `createSingFrameAudioQuery(string $scoreJson, int $styleId): string` | Generate a singing synthesis query JSON from a musical score. |
 | `frameSynthesis(string $frameAudioQueryJson, int $styleId): string` | Synthesize singing audio from a frame audio query. Returns WAV binary. |
+| `createSingFrameF0(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | Generate per-frame F0 (fundamental frequency) values as a JSON float array. |
+| `createSingFrameVolume(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | Generate per-frame volume values as a JSON float array. |
+
+---
+
+### `VoicevoxCore`
+
+Global utility functions for VOICEVOX Core.
+
+| Method | Description |
+|--------|-------------|
+| `static getVersion(): string` | Return the VOICEVOX Core version as a SemVer string. |
+| `static audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | Generate an AudioQuery JSON from an accent phrase array JSON. |
+| `static audioQueryValidate(string $audioQueryJson): void` | Validate an `AudioQuery` JSON. Throws `VoicevoxException` if invalid. |
+| `static accentPhraseValidate(string $accentPhraseJson): void` | Validate an `AccentPhrase` JSON. Throws `VoicevoxException` if invalid. |
+| `static moraValidate(string $moraJson): void` | Validate a `Mora` JSON. Throws `VoicevoxException` if invalid. |
+| `static scoreValidate(string $scoreJson): void` | Validate a `Score` JSON. Throws `VoicevoxException` if invalid. |
+| `static noteValidate(string $noteJson): void` | Validate a `Note` JSON. Throws `VoicevoxException` if invalid. |
+| `static frameAudioQueryValidate(string $frameAudioQueryJson): void` | Validate a `FrameAudioQuery` JSON. Throws `VoicevoxException` if invalid. |
+| `static framePhonemeValidate(string $framePhonemeJson): void` | Validate a `FramePhoneme` JSON. Throws `VoicevoxException` if invalid. |
+| `static ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void` | Check that a score and frame audio query are compatible. Throws `VoicevoxException` if not. |
 
 ---
 

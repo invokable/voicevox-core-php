@@ -165,6 +165,7 @@ OpenJTalkを使用したテキスト解析器。
 | メソッド | 説明 |
 |--------|------|
 | `__construct(string $openJtalkDictDir)` | OpenJTalk辞書ディレクトリのパスを指定して初期化します。 |
+| `analyze(string $text): string` | 日本語テキストを解析し、アクセント句配列のJSONを返します。 |
 | `useUserDict(UserDict $userDict): void` | ユーザー辞書を設定します。辞書を変更した場合は再度この関数を呼ぶ必要があります。 |
 
 ---
@@ -189,6 +190,7 @@ OpenJTalkを使用したテキスト解析器。
 | メソッド | 説明 |
 |--------|------|
 | `__construct(Onnxruntime $onnxruntime, OpenJtalk $openJtalk, AccelerationMode $accelerationMode = Auto, int $cpuNumThreads = 0)` | シンセサイザーを初期化します。 |
+| `onnxruntime(): Onnxruntime` | このシンセサイザーが保持する `Onnxruntime` インスタンスを返します。 |
 | `isGpuMode(): bool` | GPUモードかどうかを返します。 |
 | `metas(): string` | 読み込み済み話者のメタ情報をJSON文字列で返します。 |
 | `loadVoiceModel(VoiceModelFile $model): void` | 音声モデルを読み込みます。 |
@@ -206,6 +208,27 @@ OpenJTalkを使用したテキスト解析器。
 | `ttsFromKana(string $kana, int $styleId, bool $enableInterrogativeUpspeak = true): string` | AquesTalk風記法から音声合成します。WAVバイナリを返します。 |
 | `createSingFrameAudioQuery(string $scoreJson, int $styleId): string` | 楽譜JSONから歌唱音声合成用クエリのJSONを生成します。 |
 | `frameSynthesis(string $frameAudioQueryJson, int $styleId): string` | 歌唱音声合成用クエリから音声合成します。WAVバイナリを返します。 |
+| `createSingFrameF0(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | 楽譜と歌唱クエリからフレームごとのF0（基本周波数）をJSONのfloat配列で返します。 |
+| `createSingFrameVolume(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | 楽譜と歌唱クエリからフレームごとの音量をJSONのfloat配列で返します。 |
+
+---
+
+### `VoicevoxCore`
+
+VOICEVOX Coreのグローバルユーティリティ関数。
+
+| メソッド | 説明 |
+|--------|------|
+| `static getVersion(): string` | VOICEVOX CoreのバージョンをSemVer文字列で返します。 |
+| `static audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | アクセント句配列JSONからAudioQuery JSONを生成します。 |
+| `static audioQueryValidate(string $audioQueryJson): void` | `AudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static accentPhraseValidate(string $accentPhraseJson): void` | `AccentPhrase` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static moraValidate(string $moraJson): void` | `Mora` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static scoreValidate(string $scoreJson): void` | `Score` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static noteValidate(string $noteJson): void` | `Note` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static frameAudioQueryValidate(string $frameAudioQueryJson): void` | `FrameAudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static framePhonemeValidate(string $framePhonemeJson): void` | `FramePhoneme` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `static ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void` | 楽譜と歌唱音声合成クエリの組み合わせが有効かを確認します。不正な場合は `VoicevoxException` をスローします。 |
 
 ---
 

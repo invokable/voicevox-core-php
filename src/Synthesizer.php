@@ -50,6 +50,16 @@ class Synthesizer
     }
 
     /**
+     * ONNX Runtimeのインスタンスを返す。
+     */
+    public function onnxruntime(): Onnxruntime
+    {
+        $ptr = $this->ffi->voicevox_synthesizer_get_onnxruntime($this->handle);
+
+        return Onnxruntime::fromPtr($ptr, $this->ffi);
+    }
+
+    /**
      * ハードウェアアクセラレーションがGPUモードかどうか。
      */
     public function isGpuMode(): bool
@@ -409,6 +419,58 @@ class Synthesizer
         $this->ffi->voicevox_wav_free($wavPtr);
 
         return $wav;
+    }
+
+    /**
+     * 楽譜と歌唱音声合成用のクエリから、フレームごとの基本周波数をJSON文字列（float配列）で生成する。
+     *
+     * @param  string  $scoreJson  楽譜（JSON文字列）。
+     * @param  string  $frameAudioQueryJson  歌唱音声合成用のクエリ（JSON文字列）。
+     * @param  int  $styleId  スタイルID。
+     */
+    public function createSingFrameF0(string $scoreJson, string $frameAudioQueryJson, int $styleId): string
+    {
+        $jsonPtr = $this->ffi->new('char*');
+        $result = $this->ffi->voicevox_synthesizer_create_sing_frame_f0(
+            $this->handle,
+            $scoreJson,
+            $frameAudioQueryJson,
+            $styleId,
+            FFI::addr($jsonPtr),
+        );
+
+        VoicevoxResultCode::check($result, $this->ffi);
+
+        $json = FFI::string($jsonPtr);
+        $this->ffi->voicevox_json_free($jsonPtr);
+
+        return $json;
+    }
+
+    /**
+     * 楽譜と歌唱音声合成用のクエリから、フレームごとの音量をJSON文字列（float配列）で生成する。
+     *
+     * @param  string  $scoreJson  楽譜（JSON文字列）。
+     * @param  string  $frameAudioQueryJson  歌唱音声合成用のクエリ（JSON文字列）。
+     * @param  int  $styleId  スタイルID。
+     */
+    public function createSingFrameVolume(string $scoreJson, string $frameAudioQueryJson, int $styleId): string
+    {
+        $jsonPtr = $this->ffi->new('char*');
+        $result = $this->ffi->voicevox_synthesizer_create_sing_frame_volume(
+            $this->handle,
+            $scoreJson,
+            $frameAudioQueryJson,
+            $styleId,
+            FFI::addr($jsonPtr),
+        );
+
+        VoicevoxResultCode::check($result, $this->ffi);
+
+        $json = FFI::string($jsonPtr);
+        $this->ffi->voicevox_json_free($jsonPtr);
+
+        return $json;
     }
 
     public function __destruct()

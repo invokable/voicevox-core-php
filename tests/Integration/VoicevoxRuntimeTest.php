@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use Revolution\Voicevox\Core\Enums\AccelerationMode;
+use Revolution\Voicevox\Core\Exceptions\VoicevoxException;
 use Revolution\Voicevox\Core\Onnxruntime;
 use Revolution\Voicevox\Core\OpenJtalk;
 use Revolution\Voicevox\Core\Synthesizer;
 use Revolution\Voicevox\Core\UserDict;
 use Revolution\Voicevox\Core\VoiceModelFile;
+use Revolution\Voicevox\Core\VoicevoxCore;
 
 function voicevoxRuntimeTestRoot(): ?string
 {
@@ -188,6 +190,11 @@ describe('VOICEVOX runtime integration', function () {
     it('supports user dictionary lifecycle and openjtalk integration', function () {
         ['openJtalk' => $openJtalk] = voicevoxRuntimeFixture();
 
+        // OpenJtalk::analyze returns AccentPhrase array JSON
+        $accentPhrasesJson = $openJtalk->analyze('こんにちは');
+        expect($accentPhrasesJson)->toContain('"accent"')
+            ->and(json_decode($accentPhrasesJson, true))->toBeArray();
+
         $userDict = new UserDict;
         $accentType = 2;
         $wordId = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
@@ -233,5 +240,43 @@ describe('VOICEVOX runtime integration', function () {
                 unlink($userDictPath);
             }
         }
+    });
+
+    it('returns version string from VoicevoxCore::getVersion', function () {
+        voicevoxRuntimeFixturePaths(); // ensures the library is loaded
+
+        $version = VoicevoxCore::getVersion();
+
+        expect($version)->toBeString()->not->toBeEmpty();
+    });
+
+    it('creates audio query from accent phrases and validates JSON structures', function () {
+        ['synthesizer' => $synthesizer] = voicevoxRuntimeFixture();
+
+        $accentPhrasesJson = $synthesizer->createAccentPhrases('こんにちは', 0);
+
+        $audioQueryJson = VoicevoxCore::audioQueryCreateFromAccentPhrases($accentPhrasesJson);
+        expect($audioQueryJson)->toContain('"accent_phrases"');
+
+        // Validate methods must not throw for valid JSON
+        VoicevoxCore::audioQueryValidate($audioQueryJson);
+        VoicevoxCore::accentPhraseValidate(json_encode(json_decode($accentPhrasesJson, true)[0]));
+
+        expect(true)->toBeTrue(); // reached without exception
+    });
+
+    it('throws VoicevoxException for invalid JSON in validate methods', function () {
+        voicevoxRuntimeFixturePaths(); // ensures the library is loaded
+
+        expect(fn () => VoicevoxCore::audioQueryValidate('not-json'))->toThrow(VoicevoxException::class);
+    });
+
+    it('retrieves onnxruntime from synthesizer', function () {
+        ['synthesizer' => $synthesizer, 'onnxruntime' => $onnxruntime] = voicevoxRuntimeFixture();
+
+        $retrieved = $synthesizer->onnxruntime();
+
+        expect($retrieved)->toBeInstanceOf(Onnxruntime::class)
+            ->and($retrieved)->toBe($onnxruntime);
     });
 });

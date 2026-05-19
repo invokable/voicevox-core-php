@@ -76,11 +76,33 @@ int32_t voicevox_open_jtalk_rc_use_user_dict(
     const struct OpenJtalkRc *open_jtalk,
     const struct VoicevoxUserDict *user_dict
 );
+int32_t voicevox_open_jtalk_rc_analyze(
+    const struct OpenJtalkRc *open_jtalk,
+    const char *text,
+    char **output_accent_phrases_json
+);
 void voicevox_open_jtalk_rc_delete(struct OpenJtalkRc *open_jtalk);
 
 /* ---- Core ---- */
 struct VoicevoxInitializeOptions voicevox_make_default_initialize_options(void);
 const char *voicevox_get_version(void);
+
+/* ---- AudioQuery Utility ---- */
+int32_t voicevox_audio_query_create_from_accent_phrases(
+    const char *accent_phrases_json,
+    char **output_audio_query_json
+);
+int32_t voicevox_audio_query_validate(const char *audio_query_json);
+int32_t voicevox_accent_phrase_validate(const char *accent_phrase_json);
+int32_t voicevox_mora_validate(const char *mora_json);
+int32_t voicevox_score_validate(const char *score_json);
+int32_t voicevox_note_validate(const char *note_json);
+int32_t voicevox_frame_audio_query_validate(const char *frame_audio_query_json);
+int32_t voicevox_frame_phoneme_validate(const char *frame_phoneme_json);
+int32_t voicevox_ensure_compatible(
+    const char *score_json,
+    const char *frame_audio_query_json
+);
 
 /* ---- Voice Model File ---- */
 int32_t voicevox_voice_model_file_open(
@@ -104,6 +126,9 @@ int32_t voicevox_synthesizer_new(
     struct VoicevoxSynthesizer **out_synthesizer
 );
 void voicevox_synthesizer_delete(struct VoicevoxSynthesizer *synthesizer);
+const struct VoicevoxOnnxruntime *voicevox_synthesizer_get_onnxruntime(
+    const struct VoicevoxSynthesizer *synthesizer
+);
 int32_t voicevox_synthesizer_load_voice_model(
     const struct VoicevoxSynthesizer *synthesizer,
     const struct VoicevoxVoiceModelFile *model
@@ -206,6 +231,20 @@ int32_t voicevox_synthesizer_create_sing_frame_audio_query(
     const char *score_json,
     uint32_t style_id,
     char **output_frame_audio_query_json
+);
+int32_t voicevox_synthesizer_create_sing_frame_f0(
+    const struct VoicevoxSynthesizer *synthesizer,
+    const char *score_json,
+    const char *frame_audio_query_json,
+    uint32_t style_id,
+    char **output_f0_json
+);
+int32_t voicevox_synthesizer_create_sing_frame_volume(
+    const struct VoicevoxSynthesizer *synthesizer,
+    const char *score_json,
+    const char *frame_audio_query_json,
+    uint32_t style_id,
+    char **output_volume_json
 );
 int32_t voicevox_synthesizer_frame_synthesis(
     const struct VoicevoxSynthesizer *synthesizer,
