@@ -219,16 +219,16 @@ VOICEVOX Coreのグローバルユーティリティ関数。
 
 | メソッド | 説明 |
 |--------|------|
-| `static getVersion(): string` | VOICEVOX CoreのバージョンをSemVer文字列で返します。 |
-| `static audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | アクセント句配列JSONからAudioQuery JSONを生成します。 |
-| `static audioQueryValidate(string $audioQueryJson): void` | `AudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static accentPhraseValidate(string $accentPhraseJson): void` | `AccentPhrase` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static moraValidate(string $moraJson): void` | `Mora` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static scoreValidate(string $scoreJson): void` | `Score` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static noteValidate(string $noteJson): void` | `Note` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static frameAudioQueryValidate(string $frameAudioQueryJson): void` | `FrameAudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static framePhonemeValidate(string $framePhonemeJson): void` | `FramePhoneme` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
-| `static ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void` | 楽譜と歌唱音声合成クエリの組み合わせが有効かを確認します。不正な場合は `VoicevoxException` をスローします。 |
+| `getVersion(): string` | VOICEVOX CoreのバージョンをSemVer文字列で返します。 |
+| `audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | アクセント句配列JSONからAudioQuery JSONを生成します。 |
+| `audioQueryValidate(string $audioQueryJson): void` | `AudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `accentPhraseValidate(string $accentPhraseJson): void` | `AccentPhrase` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `moraValidate(string $moraJson): void` | `Mora` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `scoreValidate(string $scoreJson): void` | `Score` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `noteValidate(string $noteJson): void` | `Note` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `frameAudioQueryValidate(string $frameAudioQueryJson): void` | `FrameAudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `framePhonemeValidate(string $framePhonemeJson): void` | `FramePhoneme` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
+| `ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void` | 楽譜と歌唱音声合成クエリの組み合わせが有効かを確認します。不正な場合は `VoicevoxException` をスローします。 |
 
 ---
 

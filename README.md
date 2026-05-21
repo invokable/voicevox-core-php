@@ -219,16 +219,16 @@ Global utility functions for VOICEVOX Core.
 
 | Method | Description |
 |--------|-------------|
-| `static getVersion(): string` | Return the VOICEVOX Core version as a SemVer string. |
-| `static audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | Generate an AudioQuery JSON from an accent phrase array JSON. |
-| `static audioQueryValidate(string $audioQueryJson): void` | Validate an `AudioQuery` JSON. Throws `VoicevoxException` if invalid. |
-| `static accentPhraseValidate(string $accentPhraseJson): void` | Validate an `AccentPhrase` JSON. Throws `VoicevoxException` if invalid. |
-| `static moraValidate(string $moraJson): void` | Validate a `Mora` JSON. Throws `VoicevoxException` if invalid. |
-| `static scoreValidate(string $scoreJson): void` | Validate a `Score` JSON. Throws `VoicevoxException` if invalid. |
-| `static noteValidate(string $noteJson): void` | Validate a `Note` JSON. Throws `VoicevoxException` if invalid. |
-| `static frameAudioQueryValidate(string $frameAudioQueryJson): void` | Validate a `FrameAudioQuery` JSON. Throws `VoicevoxException` if invalid. |
-| `static framePhonemeValidate(string $framePhonemeJson): void` | Validate a `FramePhoneme` JSON. Throws `VoicevoxException` if invalid. |
-| `static ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void` | Check that a score and frame audio query are compatible. Throws `VoicevoxException` if not. |
+| `getVersion(): string` | Return the VOICEVOX Core version as a SemVer string. |
+| `audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | Generate an AudioQuery JSON from an accent phrase array JSON. |
+| `audioQueryValidate(string $audioQueryJson): void` | Validate an `AudioQuery` JSON. Throws `VoicevoxException` if invalid. |
+| `accentPhraseValidate(string $accentPhraseJson): void` | Validate an `AccentPhrase` JSON. Throws `VoicevoxException` if invalid. |
+| `moraValidate(string $moraJson): void` | Validate a `Mora` JSON. Throws `VoicevoxException` if invalid. |
+| `scoreValidate(string $scoreJson): void` | Validate a `Score` JSON. Throws `VoicevoxException` if invalid. |
+| `noteValidate(string $noteJson): void` | Validate a `Note` JSON. Throws `VoicevoxException` if invalid. |
+| `frameAudioQueryValidate(string $frameAudioQueryJson): void` | Validate a `FrameAudioQuery` JSON. Throws `VoicevoxException` if invalid. |
+| `framePhonemeValidate(string $framePhonemeJson): void` | Validate a `FramePhoneme` JSON. Throws `VoicevoxException` if invalid. |
+| `ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void` | Check that a score and frame audio query are compatible. Throws `VoicevoxException` if not. |
 
 ---
 

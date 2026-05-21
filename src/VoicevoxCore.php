@@ -18,7 +18,7 @@ class VoicevoxCore
      *
      * @return string SemVerでフォーマットされたバージョン。
      */
-    public static function getVersion(): string
+    public function getVersion(): string
     {
         return VoicevoxFFI::getInstance()->voicevox_get_version();
     }
@@ -28,7 +28,7 @@ class VoicevoxCore
      *
      * @param  string  $accentPhrasesJson  AccentPhrase配列のJSON文字列。
      */
-    public static function audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string
+    public function audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string
     {
         $ffi = VoicevoxFFI::getInstance();
         $jsonPtr = $ffi->new('char*');
@@ -52,7 +52,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function audioQueryValidate(string $audioQueryJson): void
+    public function audioQueryValidate(string $audioQueryJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_audio_query_validate($audioQueryJson);
@@ -66,7 +66,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function accentPhraseValidate(string $accentPhraseJson): void
+    public function accentPhraseValidate(string $accentPhraseJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_accent_phrase_validate($accentPhraseJson);
@@ -80,7 +80,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function moraValidate(string $moraJson): void
+    public function moraValidate(string $moraJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_mora_validate($moraJson);
@@ -94,7 +94,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function scoreValidate(string $scoreJson): void
+    public function scoreValidate(string $scoreJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_score_validate($scoreJson);
@@ -108,7 +108,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function noteValidate(string $noteJson): void
+    public function noteValidate(string $noteJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_note_validate($noteJson);
@@ -122,7 +122,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function frameAudioQueryValidate(string $frameAudioQueryJson): void
+    public function frameAudioQueryValidate(string $frameAudioQueryJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_frame_audio_query_validate($frameAudioQueryJson);
@@ -136,7 +136,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function framePhonemeValidate(string $framePhonemeJson): void
+    public function framePhonemeValidate(string $framePhonemeJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_frame_phoneme_validate($framePhonemeJson);
@@ -152,7 +152,7 @@ class VoicevoxCore
      *
      * @throws VoicevoxException
      */
-    public static function ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void
+    public function ensureCompatible(string $scoreJson, string $frameAudioQueryJson): void
     {
         $ffi = VoicevoxFFI::getInstance();
         $result = $ffi->voicevox_ensure_compatible($scoreJson, $frameAudioQueryJson);
