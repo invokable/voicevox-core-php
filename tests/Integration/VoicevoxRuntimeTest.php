@@ -245,7 +245,7 @@ describe('VOICEVOX runtime integration', function () {
     it('returns version string from VoicevoxCore::getVersion', function () {
         voicevoxRuntimeFixturePaths(); // ensures the library is loaded
 
-        $version = VoicevoxCore::getVersion();
+        $version = (new VoicevoxCore)->getVersion();
 
         expect($version)->toBeString()->not->toBeEmpty();
     });
@@ -255,12 +255,13 @@ describe('VOICEVOX runtime integration', function () {
 
         $accentPhrasesJson = $synthesizer->createAccentPhrases('こんにちは', 0);
 
-        $audioQueryJson = VoicevoxCore::audioQueryCreateFromAccentPhrases($accentPhrasesJson);
+        $core = new VoicevoxCore;
+        $audioQueryJson = $core->audioQueryCreateFromAccentPhrases($accentPhrasesJson);
         expect($audioQueryJson)->toContain('"accent_phrases"');
 
         // Validate methods must not throw for valid JSON
-        VoicevoxCore::audioQueryValidate($audioQueryJson);
-        VoicevoxCore::accentPhraseValidate(json_encode(json_decode($accentPhrasesJson, true)[0]));
+        $core->audioQueryValidate($audioQueryJson);
+        $core->accentPhraseValidate(json_encode(json_decode($accentPhrasesJson, true)[0]));
 
         expect(true)->toBeTrue(); // reached without exception
     });
@@ -268,7 +269,7 @@ describe('VOICEVOX runtime integration', function () {
     it('throws VoicevoxException for invalid JSON in validate methods', function () {
         voicevoxRuntimeFixturePaths(); // ensures the library is loaded
 
-        expect(fn () => VoicevoxCore::audioQueryValidate('not-json'))->toThrow(VoicevoxException::class);
+        expect(fn () => (new VoicevoxCore)->audioQueryValidate('not-json'))->toThrow(VoicevoxException::class);
     });
 
     it('retrieves onnxruntime from synthesizer', function () {
