@@ -40,7 +40,7 @@ GitHub Actions専用に`test:integration`を用意しているのでテストだ
 - headers/voicevox_core_ffi.h 
 - tests/
 - example/ サンプルコード。開発時の手動テスト用。
-- voicevox_core/ 公式のgit submodule
+- voicevox_core/ 公式のgit submodule `git submodule update --remote --merge`で更新。
 
 ## 資料
 
