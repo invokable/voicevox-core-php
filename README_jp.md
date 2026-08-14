@@ -15,7 +15,7 @@
 
 - PHP 8.3以上
 - `ext-ffi` 拡張が有効であること
-- VOICEVOX CORE 0.16+
+- VOICEVOX CORE 0.17+
 
 > [!NOTE]
 > PHP FFIはWebサーバー環境（FPMなど）では無効にされていることが多いため（`ffi.enable=false`）、このライブラリは**ローカルCLIでの利用を想定**しています。
@@ -97,7 +97,8 @@ use Revolution\Voicevox\Core\VoiceModelFile;
 
 // パス — voicevox_coreのインストール場所に合わせて変更してください
 $voicevoxCoreDir = getenv('HOME') . '/.local/voicevox_core';
-$onnxruntimeFilename = $voicevoxCoreDir . '/onnxruntime/lib/' . Onnxruntime::libVersionedFilename();
+// 現在のlibRecommendedVersionedFilenameは1.23.2です。インストールされているバージョンと合わない場合は直接指定してください。
+$onnxruntimeFilename = $voicevoxCoreDir . '/onnxruntime/lib/' . Onnxruntime::libRecommendedVersionedFilename();
 $dictDir = $voicevoxCoreDir . '/dict/open_jtalk_dic_utf_8-1.11';
 $vvmPath  = $voicevoxCoreDir . '/models/vvms/0.vvm';
 
@@ -146,15 +147,19 @@ ONNX Runtimeのローダー。プロセスレベルのシングルトンで、�
 | `static loadOnce(string $filename = ''): self` | ONNX Runtimeをロードして初期化します。2回目以降の呼び出しでは引数を無視して既存のインスタンスを返します。 |
 | `static get(): ?self` | 既存のインスタンスを返します。未初期化の場合は `null` を返します。 |
 | `supportedDevices(): string` | 利用可能なデバイス情報をJSON文字列で返します。 |
-| `static libVersionedFilename(): string` | バージョン付きONNX Runtimeライブラリのファイル名を返します（例: `libvoicevox_onnxruntime.1.17.3.dylib`）。 |
-| `static libUnversionedFilename(): string` | バージョンなしONNX Runtimeライブラリのファイル名を返します。 |
+| `static libRecommendedVersionedFilename(): string` | バージョン付きONNX Runtimeライブラリのファイル名を返します（例: `libvoicevox_onnxruntime.1.23.2.dylib`）。 |
+| `static libRecommendedUnversionedFilename(): string` | バージョンなしONNX Runtimeライブラリのファイル名を返します。 |
+| `static libMinRequiredMinorVersion(): int` | サポートされている最小の ONNX Runtime 1.x マイナーバージョンを返します。 |
+| `static libMaxSupportedMinorVersion(): int` | サポートされている ONNX Runtime 1.x の最大マイナーバージョンを返します。 |
 
 **定数:**
 
 | 定数 | 説明 |
 |------|------|
-| `LIB_NAME` | ライブラリのベース名 (`voicevox_onnxruntime`) |
-| `LIB_VERSION` | 推奨されるONNX Runtimeのバージョン |
+| `LIB_MIN_REQUIRED_MINOR_VERSION` | サポートされる ONNX Runtime 1.x の最小マイナーバージョン(`17`) |
+| `LIB_MAX_SUPPORTED_MINOR_VERSION` | サポートされる ONNX Runtime 1.x の最大マイナーバージョン (`29`) |
+| `LIB_RECOMMENDED_NAME` | ライブラリのベース名 (`voicevox_onnxruntime`) |
+| `LIB_RECOMMENDED_VERSION` | 推奨されるONNX Runtimeのバージョン (`1.23.2`) |
 
 ---
 
@@ -193,7 +198,7 @@ OpenJTalkを使用したテキスト解析器。
 | `onnxruntime(): Onnxruntime` | このシンセサイザーが保持する `Onnxruntime` インスタンスを返します。 |
 | `isGpuMode(): bool` | GPUモードかどうかを返します。 |
 | `metas(): string` | 読み込み済み話者のメタ情報をJSON文字列で返します。 |
-| `loadVoiceModel(VoiceModelFile $model): void` | 音声モデルを読み込みます。 |
+| `loadVoiceModel(VoiceModelFile $model, OnExistingVoiceModelId $onExisting = OnExistingVoiceModelId::Error): void` | 音声モデルを読み込み、すでに読み込まれているモデルIDの動作を選択します。 |
 | `unloadVoiceModel(string $voiceModelId): void` | hex IDで指定した音声モデルの読み込みを解除します。 |
 | `isLoadedVoiceModel(string $voiceModelId): bool` | 指定した音声モデルが読み込まれているか確認します。 |
 | `createAudioQuery(string $text, int $styleId): string` | 日本語テキストからAudioQuery JSONを生成します。 |

@@ -6,6 +6,7 @@ namespace Revolution\Voicevox\Core;
 
 use FFI;
 use FFI\CData;
+use InvalidArgumentException;
 use Revolution\Voicevox\Core\Enums\UserDictWordType;
 use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 
@@ -171,6 +172,10 @@ class UserDict
         UserDictWordType $wordType,
         int $priority,
     ): CData {
+        if ($priority < 0 || $priority > 10) {
+            throw new InvalidArgumentException('Priority must be between 0 and 10.');
+        }
+
         $word = $this->ffi->voicevox_user_dict_word_make($surface, $pronunciation, $accentType);
         $word->word_type = $wordType->value;
         $word->priority = $priority;

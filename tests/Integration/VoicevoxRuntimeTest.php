@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Revolution\Voicevox\Core\Enums\AccelerationMode;
+use Revolution\Voicevox\Core\Enums\OnExistingVoiceModelId;
 use Revolution\Voicevox\Core\Exceptions\VoicevoxException;
 use Revolution\Voicevox\Core\Onnxruntime;
 use Revolution\Voicevox\Core\OpenJtalk;
@@ -133,8 +134,11 @@ describe('VOICEVOX runtime integration', function () {
 
         expect($onnxruntime)->toBe(Onnxruntime::get())
             ->and($devices)->toBeArray()
-            ->and(Onnxruntime::libVersionedFilename())->not->toBe('')
-            ->and(Onnxruntime::libUnversionedFilename())->not->toBe('');
+            ->and(Onnxruntime::libRecommendedVersionedFilename())->not->toBe('')
+            ->and(Onnxruntime::libRecommendedUnversionedFilename())->not->toBe('')
+            ->and(Onnxruntime::libMinRequiredMinorVersion())->toBe(17)
+            ->and(Onnxruntime::libMaxSupportedMinorVersion())->toBe(29)
+            ->and(Onnxruntime::LIB_RECOMMENDED_VERSION)->toBe('1.23.2');
     });
 
     it('loads and unloads a voice model', function () {
@@ -148,6 +152,9 @@ describe('VOICEVOX runtime integration', function () {
             ->and($modelMetas)->toContain('"styles"')
             ->and($synthesizerMetas)->toContain('"styles"')
             ->and($synthesizer->isLoadedVoiceModel($modelId))->toBeTrue();
+
+        $synthesizer->loadVoiceModel($model, OnExistingVoiceModelId::Reload);
+        $synthesizer->loadVoiceModel($model, OnExistingVoiceModelId::Skip);
 
         $synthesizer->unloadVoiceModel($modelId);
 
@@ -198,6 +205,27 @@ describe('VOICEVOX runtime integration', function () {
         $userDict = new UserDict;
         $accentType = 2;
         $wordId = $userDict->addWord('テスト単語', 'テストタンゴ', $accentType);
+        $boundaryWordId = $userDict->addWord(
+            '境界単語',
+            'キョウカイタンゴ',
+            $accentType,
+            priority: 0,
+        );
+        $userDict->updateWord(
+            $boundaryWordId,
+            '境界単語',
+            'キョウカイタンゴ',
+            $accentType,
+            priority: 10,
+        );
+
+        expect(fn () => $userDict->addWord(
+            '無効単語',
+            'ムコウタンゴ',
+            $accentType,
+            priority: 11,
+        ))->toThrow(InvalidArgumentException::class);
+
         $initialJson = $userDict->toJson();
         expect($wordId)->toHaveLength(32)
             ->and($initialJson)->toContain('テスト単語')

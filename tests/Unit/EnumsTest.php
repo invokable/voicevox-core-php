@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Revolution\Voicevox\Core\Enums\AccelerationMode;
+use Revolution\Voicevox\Core\Enums\OnExistingVoiceModelId;
 use Revolution\Voicevox\Core\Enums\UserDictWordType;
 use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 use Revolution\Voicevox\Core\Exceptions\VoicevoxException;
@@ -31,6 +32,14 @@ describe('UserDictWordType', function () {
     });
 });
 
+describe('OnExistingVoiceModelId', function () {
+    it('has correct values', function () {
+        expect(OnExistingVoiceModelId::Error->value)->toBe(0);
+        expect(OnExistingVoiceModelId::Reload->value)->toBe(1);
+        expect(OnExistingVoiceModelId::Skip->value)->toBe(2);
+    });
+});
+
 describe('VoicevoxResultCode', function () {
     it('has correct OK value', function () {
         expect(VoicevoxResultCode::Ok->value)->toBe(0);
@@ -49,6 +58,7 @@ describe('VoicevoxResultCode', function () {
         expect(VoicevoxResultCode::ParseKanaError->value)->toBe(13);
         expect(VoicevoxResultCode::InvalidAudioQueryError->value)->toBe(14);
         expect(VoicevoxResultCode::InvalidAccentPhraseError->value)->toBe(15);
+        expect(VoicevoxResultCode::InvalidModelFormatError->value)->toBe(28);
     });
 });
 

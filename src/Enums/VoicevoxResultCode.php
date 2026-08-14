@@ -55,7 +55,7 @@ enum VoicevoxResultCode: int
     case ReadZipEntryError = 17;
 
     /** モデルの形式が不正。 */
-    case InvalidModelHeaderError = 28;
+    case InvalidModelFormatError = 28;
 
     /** すでに読み込まれている音声モデルを読み込もうとした。 */
     case ModelAlreadyLoadedError = 18;

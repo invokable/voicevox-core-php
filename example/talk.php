@@ -14,7 +14,7 @@ use Revolution\Voicevox\Core\VoiceModelFile;
 
 // パス — voicevox_coreのインストール場所に合わせて変更してください
 $voicevoxCoreDir = getenv('HOME').'/.local/voicevox_core';
-$onnxruntimeFilename = $voicevoxCoreDir.'/onnxruntime/lib/'.Onnxruntime::libVersionedFilename();
+$onnxruntimeFilename = $voicevoxCoreDir.'/onnxruntime/lib/'.Onnxruntime::libRecommendedVersionedFilename();
 $dictDir = $voicevoxCoreDir.'/dict/open_jtalk_dic_utf_8-1.11';
 $vvmPath = $voicevoxCoreDir.'/models/vvms/0.vvm';
 
