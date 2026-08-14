@@ -1,4 +1,4 @@
-/* PHP FFI Declaration for VOICEVOX Core v0.16+ (LOAD_ONNXRUNTIME mode)
+/* PHP FFI Declaration for VOICEVOX Core v0.17+ (LOAD_ONNXRUNTIME mode)
  * Pre-processed from voicevox_core.h:
  *   - Removed all #ifdef / #if / #define / #endif blocks
  *   - Removed __declspec(dllimport)
@@ -27,6 +27,7 @@ typedef struct VoicevoxVoiceModelFile VoicevoxVoiceModelFile;
 
 /* ---- Enums (as typedef int32_t) ---- */
 typedef int32_t VoicevoxAccelerationMode;
+typedef int32_t VoicevoxOnExistingVoiceModelId;
 typedef int32_t VoicevoxResultCode;
 typedef int32_t VoicevoxUserDictWordType;
 typedef uint32_t VoicevoxStyleId;
@@ -41,6 +42,10 @@ typedef struct VoicevoxInitializeOptions {
     uint16_t cpu_num_threads;
 } VoicevoxInitializeOptions;
 
+typedef struct VoicevoxLoadVoiceModelOptions {
+    VoicevoxOnExistingVoiceModelId on_existing;
+} VoicevoxLoadVoiceModelOptions;
+
 typedef struct VoicevoxSynthesisOptions {
     bool enable_interrogative_upspeak;
 } VoicevoxSynthesisOptions;
@@ -54,12 +59,14 @@ typedef struct VoicevoxUserDictWord {
     const char *pronunciation;
     uintptr_t   accent_type;
     int32_t     word_type;
-    uint32_t    priority;
+    uint8_t     priority;
 } VoicevoxUserDictWord;
 
 /* ---- ONNX Runtime (LOAD mode) ---- */
-const char *voicevox_get_onnxruntime_lib_versioned_filename(void);
-const char *voicevox_get_onnxruntime_lib_unversioned_filename(void);
+uint32_t voicevox_get_onnxruntime_lib_min_required_minor_version(void);
+uint32_t voicevox_get_onnxruntime_lib_max_supported_minor_version(void);
+const char *voicevox_get_onnxruntime_lib_recommended_versioned_filename(void);
+const char *voicevox_get_onnxruntime_lib_recommended_unversioned_filename(void);
 struct VoicevoxLoadOnnxruntimeOptions voicevox_make_default_load_onnxruntime_options(void);
 const struct VoicevoxOnnxruntime *voicevox_onnxruntime_get(void);
 int32_t voicevox_onnxruntime_load_once(
@@ -126,12 +133,14 @@ int32_t voicevox_synthesizer_new(
     struct VoicevoxSynthesizer **out_synthesizer
 );
 void voicevox_synthesizer_delete(struct VoicevoxSynthesizer *synthesizer);
+struct VoicevoxLoadVoiceModelOptions voicevox_make_default_load_voice_model_options(void);
 const struct VoicevoxOnnxruntime *voicevox_synthesizer_get_onnxruntime(
     const struct VoicevoxSynthesizer *synthesizer
 );
 int32_t voicevox_synthesizer_load_voice_model(
     const struct VoicevoxSynthesizer *synthesizer,
-    const struct VoicevoxVoiceModelFile *model
+    const struct VoicevoxVoiceModelFile *model,
+    struct VoicevoxLoadVoiceModelOptions options
 );
 int32_t voicevox_synthesizer_unload_voice_model(
     const struct VoicevoxSynthesizer *synthesizer,

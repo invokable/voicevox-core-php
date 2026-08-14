@@ -15,11 +15,23 @@ use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
  */
 class Onnxruntime
 {
-    /** ONNX Runtimeのライブラリ名。 */
-    public const string LIB_NAME = 'voicevox_onnxruntime';
+    /** 必要なONNX Runtime 1.xの最小マイナーバージョン。 */
+    public const int LIB_MIN_REQUIRED_MINOR_VERSION = 17;
+
+    /** サポートされるONNX Runtime 1.xの最大マイナーバージョン。 */
+    public const int LIB_MAX_SUPPORTED_MINOR_VERSION = 29;
+
+    /** 推奨されるONNX Runtimeのライブラリ名。 */
+    public const string LIB_RECOMMENDED_NAME = 'voicevox_onnxruntime';
 
     /** 推奨されるONNX Runtimeのバージョン。 */
-    public const string LIB_VERSION = '1.17.3';
+    public const string LIB_RECOMMENDED_VERSION = '1.23.2';
+
+    /** @deprecated Use LIB_RECOMMENDED_NAME instead. */
+    public const string LIB_NAME = self::LIB_RECOMMENDED_NAME;
+
+    /** @deprecated Use LIB_RECOMMENDED_VERSION instead. */
+    public const string LIB_VERSION = self::LIB_RECOMMENDED_VERSION;
 
     private static ?self $instance = null;
 
@@ -124,19 +136,47 @@ class Onnxruntime
     }
 
     /**
-     * ONNX Runtimeの動的ライブラリの、バージョン付きのファイル名。
+     * 推奨されるONNX Runtimeの動的ライブラリの、バージョン付きのファイル名。
      */
-    public static function libVersionedFilename(): string
+    public static function libRecommendedVersionedFilename(): string
     {
-        return VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_versioned_filename();
+        return VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_recommended_versioned_filename();
     }
 
     /**
-     * ONNX Runtimeの動的ライブラリの、バージョン無しのファイル名。
+     * 推奨されるONNX Runtimeの動的ライブラリの、バージョン無しのファイル名。
      */
+    public static function libRecommendedUnversionedFilename(): string
+    {
+        return VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_recommended_unversioned_filename();
+    }
+
+    /**
+     * ONNX Runtimeの必要な最小マイナーバージョン。
+     */
+    public static function libMinRequiredMinorVersion(): int
+    {
+        return VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_min_required_minor_version();
+    }
+
+    /**
+     * ONNX Runtimeのサポートされる最大マイナーバージョン。
+     */
+    public static function libMaxSupportedMinorVersion(): int
+    {
+        return VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_max_supported_minor_version();
+    }
+
+    /** @deprecated Use libRecommendedVersionedFilename instead. */
+    public static function libVersionedFilename(): string
+    {
+        return self::libRecommendedVersionedFilename();
+    }
+
+    /** @deprecated Use libRecommendedUnversionedFilename instead. */
     public static function libUnversionedFilename(): string
     {
-        return VoicevoxFFI::getInstance()->voicevox_get_onnxruntime_lib_unversioned_filename();
+        return self::libRecommendedUnversionedFilename();
     }
 
     public function handle(): CData

@@ -9,7 +9,7 @@
 `VOICEVOX/voicevox_core` のPHP FFIラッパー実装は**技術的に実現可能**ですが、いくつかの重要な注意点があります。C APIはコールバックなし・オペーク(不透明)ポインタ基盤のクリーンな設計で、FFIとの相性は良好です。主な課題は次の通りです：
 
 1. **PHP FFI にCプリプロセッサがない**: 公式の `voicevox_core.h` ヘッダは `#ifdef` マクロを使用しており、`FFI::cdef()` に渡す前に手動で解決する必要があります。
-2. **ONNXランタイムを先に読み込む必要がある**: 最新のv0.16+ APIでは `libvoicevox_core` より先に `libonnxruntime` を読み込む必要があり、追加の `FFI::cdef()` 呼び出しが必要です。
+2. **ONNXランタイムを先に読み込む必要がある**: 最新のv0.17+ APIでは `libvoicevox_core` より先に `libonnxruntime` を読み込む必要があり、追加の `FFI::cdef()` 呼び出しが必要です。
 3. **`ffi.enable` の設定が必要**: WebサーバーSAPIではOPcacheプリロードが必要ですが、CLIはそのまま使えます。
 4. **NativePHPとの互換性は限定的**: バンドルされているPHPバイナリにFFIは含まれておらず、`static-php-cli` でカスタムビルドが必要です。
 
@@ -36,7 +36,7 @@ CLIツール・ローカルスクリプト・カスタムデスクトップア�
 ## 1. VOICEVOX Coreの概要
 
 **リポジトリ**: [VOICEVOX/voicevox_core](https://github.com/VOICEVOX/voicevox_core)（MITライセンス）  
-**最新リリース**: v0.16.4（2026年2月）  
+**最新リリース**: v0.17.0（2026年8月）
 **言語**: Rust  
 **C APIヘッダ**: [`crates/voicevox_core_c_api/include/voicevox_core.h`](https://github.com/VOICEVOX/voicevox_core/blob/main/crates/voicevox_core_c_api/include/voicevox_core.h)（75KB、`cbindgen` 自動生成）
 
@@ -64,7 +64,7 @@ https://github.com/VOICEVOX/voicevox_core/releases/download/{VERSION}/voicevox_c
 
 ## 2. C APIのアーキテクチャ
 
-C APIは5つの論理グループにわたって**63個の関数**を公開しています。[^2]
+C APIは5つの論理グループにわたって**66個の関数**を公開しています。[^2]
 
 ### オペーク（不透明）ハンドル型
 
@@ -78,7 +78,7 @@ typedef struct VoicevoxVoiceModelFile VoicevoxVoiceModelFile;  // 音声モデ�
 typedef struct VoicevoxUserDict       VoicevoxUserDict;         // ユーザー辞書
 ```
 
-### 初期化シーケンス（最新v0.16+ API）
+### 初期化シーケンス（最新v0.17+ API）
 
 ```
 voicevox_onnxruntime_load_once()     → VoicevoxOnnxruntime*
@@ -109,7 +109,7 @@ voicevox_synthesizer_load_voice_model()
 ```c
 // 1. ONNXランタイムの読み込み
 VoicevoxLoadOnnxruntimeOptions ort_opts = voicevox_make_default_load_onnxruntime_options();
-ort_opts.filename = "./voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.so.1.17.3";
+ort_opts.filename = "./voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.so.1.23.2";
 const VoicevoxOnnxruntime *onnxruntime;
 voicevox_onnxruntime_load_once(ort_opts, &onnxruntime);
 
@@ -125,7 +125,9 @@ voicevox_synthesizer_new(onnxruntime, open_jtalk, opts, &synthesizer);
 // 4. 音声モデルの読み込み
 VoicevoxVoiceModelFile *model;
 voicevox_voice_model_file_open("models/vvms/0.vvm", &model);
-voicevox_synthesizer_load_voice_model(synthesizer, model);
+VoicevoxLoadVoiceModelOptions model_opts =
+    voicevox_make_default_load_voice_model_options();
+voicevox_synthesizer_load_voice_model(synthesizer, model, model_opts);
 
 // 5. 音声合成
 size_t wav_size;
@@ -576,7 +578,7 @@ $ffi = VoicevoxFFI::getInstance();
 
 // ONNXランタイムの読み込み
 $onnxruntime = VoicevoxOnnxruntime::loadOnce(
-    './voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.so.1.17.3'
+    './voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.so.1.23.2'
 );
 
 // OpenJTalk解析器の作成
@@ -592,7 +594,8 @@ $synthesizer = VoicevoxSynthesizer::create($onnxruntime, $openJtalkPtr);
 // 音声モデルの読み込み
 $modelPtr = $ffi->new('struct VoicevoxVoiceModelFile*');
 $ffi->voicevox_voice_model_file_open('./models/vvms/0.vvm', FFI::addr($modelPtr));
-$ffi->voicevox_synthesizer_load_voice_model($synthesizer->handle(), $modelPtr);
+$modelOptions = $ffi->voicevox_make_default_load_voice_model_options();
+$ffi->voicevox_synthesizer_load_voice_model($synthesizer->handle(), $modelPtr, $modelOptions);
 
 // 音声合成（ずんだもん あまあま = style_id: 1）
 $wav = $synthesizer->tts('こんにちは、世界！', styleId: 1);
@@ -603,7 +606,7 @@ file_put_contents('output.wav', $wav);
 
 ## 7. ONNXランタイムの読み込み
 
-最新v0.16+ APIでは、他の操作より先に**明示的に**ONNXランタイムを読み込む必要があります。3つの戦略があります：[^11]
+最新v0.17+ APIでは、他の操作より先に**明示的に**ONNXランタイムを読み込む必要があります。3つの戦略があります：[^11]
 
 ### 戦略1: `voicevox_onnxruntime_load_once()` （推奨）
 
@@ -612,8 +615,8 @@ file_put_contents('output.wav', $wav);
 ```php
 $ffi = VoicevoxFFI::getInstance();
 
-// バージョン付きファイル名を取得（例: "libvoicevox_onnxruntime.so.1.17.3"）
-$versionedName = FFI::string($ffi->voicevox_get_onnxruntime_lib_versioned_filename());
+// 推奨バージョン付きファイル名を取得（例: "libvoicevox_onnxruntime.so.1.23.2"）
+$versionedName = FFI::string($ffi->voicevox_get_onnxruntime_lib_recommended_versioned_filename());
 
 $opts = $ffi->voicevox_make_default_load_onnxruntime_options();
 $opts->filename = './voicevox_core/onnxruntime/lib/' . $versionedName;
@@ -630,7 +633,7 @@ $result = $ffi->voicevox_onnxruntime_load_once(
 ```php
 // まずONNXランタイムをプロセスメモリに読み込む（関数宣言なし）
 // これは内部でdlopen()を呼び出し、voicevox_coreのリンカ依存を解決する
-FFI::cdef('', '/path/to/voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.so.1.17.3');
+FFI::cdef('', '/path/to/voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.so.1.23.2');
 
 // voicevox_coreの読み込み（onnxruntimeのシンボルは解決済み）
 $ffi = FFI::cdef(/* 宣言 */, '/path/to/libvoicevox_core.so');
@@ -732,7 +735,7 @@ musl libc（Alpine系）の静的PHPビルドでは、静的リンクの制限�
 以下は `voicevox_core.h` から `VOICEVOX_LOAD_ONNXRUNTIME` ビルド用にプリプロセスしたPHP FFI互換サブセットです。`headers/voicevox_core_ffi.h` として保存してください：[^10]
 
 ```c
-/* PHP FFI向け VOICEVOX Core v0.16+ 宣言（LOAD_ONNXRUNTIMEモード）
+/* PHP FFI向け VOICEVOX Core v0.17+ 宣言（LOAD_ONNXRUNTIMEモード）
  * voicevox_core.h から前処理済み:
  *   - 全 #ifdef / #if / #define / #endif ブロックを削除
  *   - __declspec(dllimport) を削除
@@ -762,11 +765,16 @@ typedef int32_t VoicevoxAccelerationMode;
 typedef int32_t VoicevoxResultCode;
 typedef int32_t VoicevoxUserDictWordType;
 typedef uint32_t VoicevoxStyleId;
+typedef int32_t VoicevoxOnExistingVoiceModelId;
 
 /* ---- 具体的な構造体 ---- */
 typedef struct VoicevoxLoadOnnxruntimeOptions {
-    char *filename;
+    const char *filename;
 } VoicevoxLoadOnnxruntimeOptions;
+
+typedef struct VoicevoxLoadVoiceModelOptions {
+    VoicevoxOnExistingVoiceModelId on_existing;
+} VoicevoxLoadVoiceModelOptions;
 
 typedef struct VoicevoxInitializeOptions {
     int32_t  acceleration_mode;
@@ -786,12 +794,14 @@ typedef struct VoicevoxUserDictWord {
     const char *pronunciation;
     uintptr_t   accent_type;
     int32_t     word_type;
-    uint32_t    priority;
+    uint8_t     priority;
 } VoicevoxUserDictWord;
 
 /* ---- ONNXランタイム（LOADモード） ---- */
-const char *voicevox_get_onnxruntime_lib_versioned_filename(void);
-const char *voicevox_get_onnxruntime_lib_unversioned_filename(void);
+const char *voicevox_get_onnxruntime_lib_recommended_versioned_filename(void);
+const char *voicevox_get_onnxruntime_lib_recommended_unversioned_filename(void);
+uint32_t voicevox_get_onnxruntime_lib_min_required_minor_version(void);
+uint32_t voicevox_get_onnxruntime_lib_max_supported_minor_version(void);
 struct VoicevoxLoadOnnxruntimeOptions voicevox_make_default_load_onnxruntime_options(void);
 const struct VoicevoxOnnxruntime *voicevox_onnxruntime_get(void);
 int32_t voicevox_onnxruntime_load_once(
@@ -838,8 +848,10 @@ int32_t voicevox_synthesizer_new(
 void voicevox_synthesizer_delete(struct VoicevoxSynthesizer *synthesizer);
 int32_t voicevox_synthesizer_load_voice_model(
     const struct VoicevoxSynthesizer *synthesizer,
-    const struct VoicevoxVoiceModelFile *model
+    const struct VoicevoxVoiceModelFile *model,
+    struct VoicevoxLoadVoiceModelOptions options
 );
+struct VoicevoxLoadVoiceModelOptions voicevox_make_default_load_voice_model_options(void);
 int32_t voicevox_synthesizer_unload_voice_model(
     const struct VoicevoxSynthesizer *synthesizer,
     const uint8_t *model_id
@@ -1025,7 +1037,7 @@ class AccelerationMode
 
 | 知見 | 信頼度 | ソース |
 |------|-------|--------|
-| C APIは63個の関数を持つ | 高 | ヘッダ直接調査 |
+| C APIは66個の関数を持つ | 高 | ヘッダ直接調査 |
 | APIにコールバックなし | 高 | ヘッダ分析 — 関数ポインタtypedefなし |
 | PHP FFI非互換が6点ある | 高 | ヘッダソース + PHP FFIドキュメント |
 | `uintptr_t` → `uint64_t` のfix | 高 | bindgenレイアウトテストで確認済み |
@@ -1039,8 +1051,8 @@ class AccelerationMode
 
 ## 脚注
 
-[^1]: [VOICEVOX/voicevox_core リリース](https://github.com/VOICEVOX/voicevox_core/releases) — v0.16.4 リリースアセット
-[^2]: [crates/voicevox_core_c_api/include/voicevox_core.h](https://github.com/VOICEVOX/voicevox_core/blob/main/crates/voicevox_core_c_api/include/voicevox_core.h) — SHA `81a2d8e`、cbindgen 0.28.0
+[^1]: [VOICEVOX/voicevox_core リリース](https://github.com/VOICEVOX/voicevox_core/releases) — v0.17.0 リリースアセット
+[^2]: [crates/voicevox_core_c_api/include/voicevox_core.h](https://github.com/VOICEVOX/voicevox_core/blob/8f4e299c10b181cc5058d32b1a492999b5c2b2c4/crates/voicevox_core_c_api/include/voicevox_core.h) — VOICEVOX Core 0.17.0
 [^3]: [example/cpp/unix/talk.cpp](https://github.com/VOICEVOX/voicevox_core/blob/main/example/cpp/unix/talk.cpp)
 [^4]: [VOICEVOX/voicevox_core README.md](https://github.com/VOICEVOX/voicevox_core/blob/main/README.md) — コミュニティラッパーセクション
 [^5]: [sevenc-nanashi/voicevox.rb:examples/repl_core.rb:22-36](https://github.com/sevenc-nanashi/voicevox.rb/blob/main/examples/repl_core.rb)

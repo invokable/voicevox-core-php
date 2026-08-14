@@ -15,7 +15,7 @@ This is a package for pure PHP. For general use, the [Laravel version](https://g
 
 - PHP 8.3+
 - `ext-ffi` extension enabled
-- VOICEVOX CORE 0.16+
+- VOICEVOX CORE 0.17+
 
 > [!NOTE]
 > PHP FFI is typically disabled in web server environments (e.g., FPM with `ffi.enable=false`). This library is intended for **local CLI use only**.
@@ -97,7 +97,7 @@ use Revolution\Voicevox\Core\VoiceModelFile;
 
 // Paths — adjust to your voicevox_core installation
 $voicevoxCoreDir = getenv('HOME') . '/.local/voicevox_core';
-$onnxruntimeFilename = $voicevoxCoreDir . '/onnxruntime/lib/' . Onnxruntime::libVersionedFilename();
+$onnxruntimeFilename = $voicevoxCoreDir . '/onnxruntime/lib/' . Onnxruntime::libRecommendedVersionedFilename();
 $dictDir = $voicevoxCoreDir . '/dict/open_jtalk_dic_utf_8-1.11';
 $vvmPath  = $voicevoxCoreDir . '/models/vvms/0.vvm';
 
@@ -146,15 +146,19 @@ ONNX Runtime loader. A process-level singleton — only one instance exists per 
 | `static loadOnce(string $filename = ''): self` | Load and initialize ONNX Runtime. On subsequent calls, ignores the argument and returns the existing instance. |
 | `static get(): ?self` | Return the existing instance, or `null` if not yet initialized. |
 | `supportedDevices(): string` | Return available device information as a JSON string. |
-| `static libVersionedFilename(): string` | Return the versioned filename of the ONNX Runtime library (e.g., `libvoicevox_onnxruntime.1.17.3.dylib`). |
-| `static libUnversionedFilename(): string` | Return the unversioned filename of the ONNX Runtime library. |
+| `static libRecommendedVersionedFilename(): string` | Return the recommended versioned filename of the ONNX Runtime library (e.g., `libvoicevox_onnxruntime.1.23.2.dylib`). |
+| `static libRecommendedUnversionedFilename(): string` | Return the recommended unversioned filename of the ONNX Runtime library. |
+| `static libMinRequiredMinorVersion(): int` | Return the minimum supported ONNX Runtime 1.x minor version. |
+| `static libMaxSupportedMinorVersion(): int` | Return the maximum supported ONNX Runtime 1.x minor version. |
 
 **Constants:**
 
 | Constant | Description |
 |----------|-------------|
-| `LIB_NAME` | Library base name (`voicevox_onnxruntime`) |
-| `LIB_VERSION` | Recommended ONNX Runtime version |
+| `LIB_MIN_REQUIRED_MINOR_VERSION` | Minimum supported ONNX Runtime 1.x minor version (`17`) |
+| `LIB_MAX_SUPPORTED_MINOR_VERSION` | Maximum supported ONNX Runtime 1.x minor version (`29`) |
+| `LIB_RECOMMENDED_NAME` | Recommended library base name (`voicevox_onnxruntime`) |
+| `LIB_RECOMMENDED_VERSION` | Recommended ONNX Runtime version (`1.23.2`) |
 
 ---
 
@@ -193,7 +197,7 @@ Main text-to-speech synthesizer.
 | `onnxruntime(): Onnxruntime` | Return the `Onnxruntime` instance held by this synthesizer. |
 | `isGpuMode(): bool` | Return whether GPU mode is active. |
 | `metas(): string` | Return loaded speaker metadata as a JSON string. |
-| `loadVoiceModel(VoiceModelFile $model): void` | Load a voice model. |
+| `loadVoiceModel(VoiceModelFile $model, OnExistingVoiceModelId $onExisting = Error): void` | Load a voice model and choose the behavior for an already loaded model ID. |
 | `unloadVoiceModel(string $voiceModelId): void` | Unload a voice model by its hex ID. |
 | `isLoadedVoiceModel(string $voiceModelId): bool` | Check whether a voice model is loaded. |
 | `createAudioQuery(string $text, int $styleId): string` | Generate an AudioQuery JSON from Japanese text. |

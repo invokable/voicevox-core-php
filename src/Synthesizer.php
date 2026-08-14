@@ -7,6 +7,7 @@ namespace Revolution\Voicevox\Core;
 use FFI;
 use FFI\CData;
 use Revolution\Voicevox\Core\Enums\AccelerationMode;
+use Revolution\Voicevox\Core\Enums\OnExistingVoiceModelId;
 use Revolution\Voicevox\Core\Enums\VoicevoxResultCode;
 
 /**
@@ -82,12 +83,20 @@ class Synthesizer
 
     /**
      * モデルを読み込む。
+     *
+     * @param  OnExistingVoiceModelId  $onExisting  同じIDのモデルが既に読み込まれている場合の動作。
      */
-    public function loadVoiceModel(VoiceModelFile $model): void
-    {
+    public function loadVoiceModel(
+        VoiceModelFile $model,
+        OnExistingVoiceModelId $onExisting = OnExistingVoiceModelId::Error,
+    ): void {
+        $options = $this->ffi->voicevox_make_default_load_voice_model_options();
+        $options->on_existing = $onExisting->value;
+
         $result = $this->ffi->voicevox_synthesizer_load_voice_model(
             $this->handle,
             $model->handle(),
+            $options,
         );
 
         VoicevoxResultCode::check($result, $this->ffi);
