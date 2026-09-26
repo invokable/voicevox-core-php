@@ -17,7 +17,7 @@ PHPのFFIはWebサーバーでは無効にされてることが多いのでロ�
 ## Technology Stack
 
 - **Language**: PHP 8.3+, FFI
-- **Testing**: Pest PHP 4.x
+- **Testing**: Pest PHP
 - **Code Quality**: Laravel Pint (PSR-12)
 
 Pure PHP用パッケージなのでフレームワークには依存しない。PestやPintのツールは使う。
