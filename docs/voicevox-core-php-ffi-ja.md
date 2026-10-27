@@ -36,9 +36,9 @@ CLIツール・ローカルスクリプト・カスタムデスクトップア�
 ## 1. VOICEVOX Coreの概要
 
 **リポジトリ**: [VOICEVOX/voicevox_core](https://github.com/VOICEVOX/voicevox_core)（MITライセンス）  
-**最新リリース**: v0.17.0（2026年8月）
+**最新リリース**: v0.17.1（2026年10月）
 **言語**: Rust  
-**C APIヘッダ**: [`crates/voicevox_core_c_api/include/voicevox_core.h`](https://github.com/VOICEVOX/voicevox_core/blob/main/crates/voicevox_core_c_api/include/voicevox_core.h)（75KB、`cbindgen` 自動生成）
+**C APIヘッダ**: [`crates/voicevox_core_c_api/include/voicevox_core.h`](https://github.com/VOICEVOX/voicevox_core/blob/68ae4b2cf3d134bd14a6e466f753f9cfaf7f441a/crates/voicevox_core_c_api/include/voicevox_core.h)（75KB、`cbindgen` 自動生成）
 
 VOICEVOX Coreはテキスト音声合成（TTS）と歌声合成のライブラリです。主要プラットフォーム向けにビルド済みCダイナミックライブラリが配布されています：
 
@@ -64,7 +64,7 @@ https://github.com/VOICEVOX/voicevox_core/releases/download/{VERSION}/voicevox_c
 
 ## 2. C APIのアーキテクチャ
 
-C APIは5つの論理グループにわたって**66個の関数**を公開しています。[^2]
+C APIは複数の論理グループにわたって関数を公開しています。[^2]
 
 ### オペーク（不透明）ハンドル型
 
@@ -74,8 +74,9 @@ APIはオペークなCstructポインタを使用し、PHPからは内部が見�
 typedef struct VoicevoxOnnxruntime    VoicevoxOnnxruntime;    // ONNXランタイムインスタンス
 typedef struct OpenJtalkRc            OpenJtalkRc;             // 日本語テキスト解析器
 typedef struct VoicevoxSynthesizer    VoicevoxSynthesizer;     // メイン合成器
+typedef struct VoicevoxAudioFeature   VoicevoxAudioFeature;   // フレーム単位合成の中間表現
 typedef struct VoicevoxVoiceModelFile VoicevoxVoiceModelFile;  // 音声モデルファイル(.vvm)
-typedef struct VoicevoxUserDict       VoicevoxUserDict;         // ユーザー辞書
+typedef struct VoicevoxUserDict       VoicevoxUserDict;        // ユーザー辞書
 ```
 
 ### 初期化シーケンス（最新v0.17+ API）
@@ -101,7 +102,9 @@ voicevox_synthesizer_load_voice_model()
 ### メモリ管理
 
 - `char**` / `uint8_t**` で返されるJSONとWAVバッファは**Cヒープ上に確保**される
-- 呼び出し側が `voicevox_json_free(char*)` と `voicevox_wav_free(uint8_t*)` で解放必須
+- 呼び出し側はJSON文字列を `voicevox_string_free(char*)`、WAV/PCMを `voicevox_bytes_free(uint8_t*)` で解放する
+- 旧名の`voicevox_json_free()` / `voicevox_wav_free()`もdeprecatedな別名として残るが、新規コードでは使用しない
+- `voicevox_synthesizer_render()`の出力が0バイトの場合は`voicevox_empty_bytes`が返るため、`voicevox_bytes_free()`を呼ばない
 - オペークハンドルは各 `_delete()` 関数で解放（v0.16.1以降、nullセーフ）
 
 ### C言語での使用例（`example/cpp/unix/talk.cpp` より）[^3]
@@ -136,7 +139,7 @@ voicevox_synthesizer_tts(synthesizer, "テスト", 0,
     voicevox_make_default_tts_options(), &wav_size, &wav);
 
 // 6. クリーンアップ
-voicevox_wav_free(wav);
+voicevox_bytes_free(wav);
 voicevox_synthesizer_delete(synthesizer);
 voicevox_voice_model_file_delete(model);
 voicevox_open_jtalk_rc_delete(open_jtalk);
@@ -170,7 +173,7 @@ VOICEVOX Core READMEに記載されたコミュニティFFIラッパー一覧[^4
 | 文字列入力 | PHPの文字列 → C char* に変換 |
 | 出力バッファ | ダブルポインタ `**char`/`**uint8_t` + `*size_t` |
 | 結果コード | 整数コードを言語のエラー/例外にマッピング |
-| メモリ解放 | `voicevox_wav_free()` と `voicevox_json_free()` を必ず呼ぶ |
+| メモリ解放 | `voicevox_bytes_free()` と `voicevox_string_free()` を使う。0バイトrender出力は解放しない |
 | AudioQuery | JSON文字列としてやり取り（Cの構造体を解析不要） |
 
 ### RubyラッパーパターンとPHP FFIの対応[^5]
@@ -186,7 +189,7 @@ Voicevox::Core.voicevox_tts(text, speaker_id, opts, size_ptr, return_ptr)
 
 data_ptr = return_ptr.read_pointer
 data = data_ptr.read_string(size_ptr.read_int)
-Voicevox::Core.voicevox_wav_free(data_ptr)
+Voicevox::Core.voicevox_bytes_free(data_ptr)
 ```
 
 ### Common Lisp CFIパターン（PHP FFIに最も近い）[^6]
@@ -196,7 +199,7 @@ Voicevox::Core.voicevox_wav_free(data_ptr)
                             (out-wav (:pointer :uint8)))
   (vv-tts text-c speaker-id options wav-length out-wav)
   ;; データをコピーしてCポインタを解放
-  (cffi:voicevox_wav_free out-wav-ptr))
+  (cffi:voicevox_bytes_free out-wav-ptr))
 ```
 
 ---
@@ -286,7 +289,7 @@ $result = $ffi->voicevox_synthesizer_tts(
 $wav_data = FFI::string($wav_ptr, (int) $wav_size->cdata);
 
 // Cが確保したメモリを解放
-$ffi->voicevox_wav_free($wav_ptr);
+$ffi->voicevox_bytes_free($wav_ptr);
 ```
 
 ---
@@ -315,7 +318,7 @@ $ffi->voicevox_wav_free($wav_ptr);
 #ifdef _WIN32
 __declspec(dllimport)
 #endif
-void voicevox_json_free(char *json);
+void voicevox_string_free(char *json);
 ```
 
 PHP FFIは `__declspec` を解釈できません。Linux/macOS上でも、このコードがあるとパースに失敗します。
@@ -505,7 +508,7 @@ class VoicevoxSynthesizer
         ResultCode::check($result, $this->ffi);
 
         $wav = FFI::string($wavPtr, (int) $wavSize->cdata);
-        $this->ffi->voicevox_wav_free($wavPtr);
+        $this->ffi->voicevox_bytes_free($wavPtr);
 
         return $wav;
     }
@@ -526,7 +529,7 @@ class VoicevoxSynthesizer
         ResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -553,7 +556,7 @@ class VoicevoxSynthesizer
         ResultCode::check($result, $this->ffi);
 
         $wav = FFI::string($wavPtr, (int) $wavSize->cdata);
-        $this->ffi->voicevox_wav_free($wavPtr);
+        $this->ffi->voicevox_bytes_free($wavPtr);
 
         return $wav;
     }
@@ -735,7 +738,7 @@ musl libc（Alpine系）の静的PHPビルドでは、静的リンクの制限�
 以下は `voicevox_core.h` から `VOICEVOX_LOAD_ONNXRUNTIME` ビルド用にプリプロセスしたPHP FFI互換サブセットです。`headers/voicevox_core_ffi.h` として保存してください：[^10]
 
 ```c
-/* PHP FFI向け VOICEVOX Core v0.17+ 宣言（LOAD_ONNXRUNTIMEモード）
+/* PHP FFI向け VOICEVOX Core v0.17.1+ 宣言（LOAD_ONNXRUNTIMEモード）
  * voicevox_core.h から前処理済み:
  *   - 全 #ifdef / #if / #define / #endif ブロックを削除
  *   - __declspec(dllimport) を削除
@@ -757,6 +760,7 @@ typedef _Bool              bool;
 typedef struct OpenJtalkRc OpenJtalkRc;
 typedef struct VoicevoxOnnxruntime VoicevoxOnnxruntime;
 typedef struct VoicevoxSynthesizer VoicevoxSynthesizer;
+typedef struct VoicevoxAudioFeature VoicevoxAudioFeature;
 typedef struct VoicevoxUserDict VoicevoxUserDict;
 typedef struct VoicevoxVoiceModelFile VoicevoxVoiceModelFile;
 
@@ -784,6 +788,19 @@ typedef struct VoicevoxInitializeOptions {
 typedef struct VoicevoxSynthesisOptions {
     bool enable_interrogative_upspeak;
 } VoicevoxSynthesisOptions;
+
+typedef struct VoicevoxAudioQueryFrameLengthOptions {
+    bool enable_interrogative_upspeak;
+} VoicevoxAudioQueryFrameLengthOptions;
+
+typedef struct VoicevoxAudioFeatureSlice {
+    const struct VoicevoxAudioFeature *audio_feature;
+    uintptr_t start_offset;
+    uintptr_t end;
+    bool end_is_inclusive;
+    bool clamp;
+    bool allow_start_exceeds_end;
+} VoicevoxAudioFeatureSlice;
 
 typedef struct VoicevoxTtsOptions {
     bool enable_interrogative_upspeak;
@@ -823,6 +840,7 @@ void voicevox_open_jtalk_rc_delete(struct OpenJtalkRc *open_jtalk);
 /* ---- コア ---- */
 struct VoicevoxInitializeOptions voicevox_make_default_initialize_options(void);
 const char *voicevox_get_version(void);
+double voicevox_get_frame_rate(void);
 
 /* ---- 音声モデルファイル ---- */
 int32_t voicevox_voice_model_file_open(
@@ -870,6 +888,13 @@ int32_t voicevox_onnxruntime_create_supported_devices_json(
 );
 
 /* ---- AudioQuery ---- */
+struct VoicevoxAudioQueryFrameLengthOptions
+voicevox_make_default_audio_query_frame_length_options(void);
+int32_t voicevox_audio_query_frame_length(
+    const char *audio_query_json,
+    struct VoicevoxAudioQueryFrameLengthOptions options,
+    uintptr_t *output_frame_length
+);
 int32_t voicevox_synthesizer_create_audio_query(
     const struct VoicevoxSynthesizer *synthesizer,
     const char *text,
@@ -911,6 +936,57 @@ int32_t voicevox_synthesizer_synthesis(
     uintptr_t *output_wav_length,
     uint8_t **output_wav
 );
+int32_t voicevox_synthesizer_create_audio_feature(
+    const struct VoicevoxSynthesizer *synthesizer,
+    const char *audio_query_json,
+    uint32_t style_id,
+    struct VoicevoxSynthesisOptions options,
+    struct VoicevoxAudioFeature **out_audio_feature
+);
+uintptr_t voicevox_audio_feature_len(
+    const struct VoicevoxAudioFeature *audio_feature
+);
+bool voicevox_audio_feature_is_empty(
+    const struct VoicevoxAudioFeature *audio_feature
+);
+int32_t voicevox_audio_feature_slice(
+    const struct VoicevoxAudioFeature *audio_feature,
+    uintptr_t start_inclusive,
+    uintptr_t end,
+    bool end_is_inclusive,
+    bool clamp,
+    bool allow_start_exceeds_end,
+    struct VoicevoxAudioFeatureSlice *output
+);
+struct VoicevoxAudioFeatureSlice voicevox_audio_feature_slice_new(
+    const struct VoicevoxAudioFeature *audio_feature,
+    bool clamp,
+    bool allow_start_exceeds_end
+);
+int32_t voicevox_audio_feature_slice_len(
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    uintptr_t *output
+);
+int32_t voicevox_audio_feature_slice_is_empty(
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    bool *output
+);
+int32_t voicevox_audio_feature_slice_slice(
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    uintptr_t start_inclusive,
+    uintptr_t end,
+    bool end_is_inclusive,
+    bool clamp,
+    bool allow_start_exceeds_end,
+    struct VoicevoxAudioFeatureSlice *output
+);
+int32_t voicevox_synthesizer_render(
+    const struct VoicevoxSynthesizer *synthesizer,
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    uintptr_t *output_pcm_length,
+    uint8_t **output_pcm
+);
+void voicevox_audio_feature_delete(struct VoicevoxAudioFeature *audio_feature);
 
 struct VoicevoxTtsOptions voicevox_make_default_tts_options(void);
 int32_t voicevox_synthesizer_tts(
@@ -946,8 +1022,8 @@ int32_t voicevox_synthesizer_frame_synthesis(
 );
 
 /* ---- メモリ管理 ---- */
-void voicevox_json_free(char *json);
-void voicevox_wav_free(uint8_t *wav);
+void voicevox_string_free(char *json);
+void voicevox_bytes_free(uint8_t *wav);
 const char *voicevox_error_result_to_message(int32_t result_code);
 
 /* ---- ユーザー辞書 ---- */
@@ -1037,7 +1113,7 @@ class AccelerationMode
 
 | 知見 | 信頼度 | ソース |
 |------|-------|--------|
-| C APIは66個の関数を持つ | 高 | ヘッダ直接調査 |
+| C API宣言は固定したv0.17.1ヘッダと一致 | 高 | ヘッダ直接調査 |
 | APIにコールバックなし | 高 | ヘッダ分析 — 関数ポインタtypedefなし |
 | PHP FFI非互換が6点ある | 高 | ヘッダソース + PHP FFIドキュメント |
 | `uintptr_t` → `uint64_t` のfix | 高 | bindgenレイアウトテストで確認済み |
@@ -1049,10 +1125,18 @@ class AccelerationMode
 
 ---
 
+## 11. VOICEVOX Core 0.17.1のフレーム単位render
+
+0.17.1では`voicevox_synthesizer_create_audio_feature()`で中間表現を作成し、`voicevox_audio_feature_slice()`で区間を選び、`voicevox_synthesizer_render()`で16-bit PCMを取得できます。フレームレートは`voicevox_get_frame_rate()`で取得でき、AudioQueryの推定フレーム数は`voicevox_audio_query_frame_length()`で計算できます。
+
+C APIにはPythonの高レベル`streaming_synthesis`に相当する関数はありません。PHPラッパーではAudioFeatureとsliceの所有期間を管理し、呼び出し側が範囲ごとにrenderする低レベルAPIを提供します。sliceは元のAudioFeatureを参照するため、AudioFeatureを解放する前にsliceの利用を終えてください。render出力はWAVではなくPCMです。0バイトの出力ポインターは`voicevox_empty_bytes`なので解放しません。
+
+新しいシンボルを使う場合、実行時ライブラリは0.17.1以降が必要です。ストリーミングトークには`vvm_format_version=2`のVVMを使います。
+
 ## 脚注
 
-[^1]: [VOICEVOX/voicevox_core リリース](https://github.com/VOICEVOX/voicevox_core/releases) — v0.17.0 リリースアセット
-[^2]: [crates/voicevox_core_c_api/include/voicevox_core.h](https://github.com/VOICEVOX/voicevox_core/blob/8f4e299c10b181cc5058d32b1a492999b5c2b2c4/crates/voicevox_core_c_api/include/voicevox_core.h) — VOICEVOX Core 0.17.0
+[^1]: [VOICEVOX/voicevox_core リリース](https://github.com/VOICEVOX/voicevox_core/releases) — v0.17.1 リリースアセット
+[^2]: [crates/voicevox_core_c_api/include/voicevox_core.h](https://github.com/VOICEVOX/voicevox_core/blob/68ae4b2cf3d134bd14a6e466f753f9cfaf7f441a/crates/voicevox_core_c_api/include/voicevox_core.h) — VOICEVOX Core 0.17.1
 [^3]: [example/cpp/unix/talk.cpp](https://github.com/VOICEVOX/voicevox_core/blob/main/example/cpp/unix/talk.cpp)
 [^4]: [VOICEVOX/voicevox_core README.md](https://github.com/VOICEVOX/voicevox_core/blob/main/README.md) — コミュニティラッパーセクション
 [^5]: [sevenc-nanashi/voicevox.rb:examples/repl_core.rb:22-36](https://github.com/sevenc-nanashi/voicevox.rb/blob/main/examples/repl_core.rb)
@@ -1060,7 +1144,7 @@ class AccelerationMode
 [^7]: [JetBrains/phpstorm-stubs:FFI/FFI.php](https://github.com/JetBrains/phpstorm-stubs/blob/master/FFI/FFI.php) — PHP FFI型スタブ正典
 [^8]: [idealo/php-rdkafka-ffi:src/RdKafka/FFI/Library.php:87-103](https://github.com/idealo/php-rdkafka-ffi/blob/main/src/RdKafka/FFI/Library.php)
 [^9]: [idealo/php-rdkafka-ffi:src/RdKafka/FFI/Library.php:60-85](https://github.com/idealo/php-rdkafka-ffi/blob/main/src/RdKafka/FFI/Library.php)
-[^10]: [crates/voicevox_core_c_api/include/voicevox_core.h](https://github.com/VOICEVOX/voicevox_core/blob/main/crates/voicevox_core_c_api/include/voicevox_core.h) — 問題1〜6の分析
+[^10]: [crates/voicevox_core_c_api/include/voicevox_core.h](https://github.com/VOICEVOX/voicevox_core/blob/68ae4b2cf3d134bd14a6e466f753f9cfaf7f441a/crates/voicevox_core_c_api/include/voicevox_core.h) — VOICEVOX Core 0.17.1
 [^11]: [example/cpp/unix/talk.cpp:27-37](https://github.com/VOICEVOX/voicevox_core/blob/main/example/cpp/unix/talk.cpp)；[windymelt/voicevoxcore4s:Main.scala:14-18](https://github.com/windymelt/voicevoxcore4s)
 [^12]: [skoro/php-tkui](https://github.com/skoro/php-tkui)；[reliforp/reli-prof](https://github.com/reliforp/reli-prof) — パッケージ構成パターン
 [^13]: [NativePHP/php-bin:php-extensions.txt](https://github.com/NativePHP/php-bin) — バンドルPHP拡張一覧

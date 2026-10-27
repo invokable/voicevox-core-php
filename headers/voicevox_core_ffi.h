@@ -1,4 +1,4 @@
-/* PHP FFI Declaration for VOICEVOX Core v0.17+ (LOAD_ONNXRUNTIME mode)
+/* PHP FFI Declaration for VOICEVOX Core v0.17.1+ (LOAD_ONNXRUNTIME mode)
  * Pre-processed from voicevox_core.h:
  *   - Removed all #ifdef / #if / #define / #endif blocks
  *   - Removed __declspec(dllimport)
@@ -22,6 +22,7 @@ typedef _Bool              bool;
 typedef struct OpenJtalkRc OpenJtalkRc;
 typedef struct VoicevoxOnnxruntime VoicevoxOnnxruntime;
 typedef struct VoicevoxSynthesizer VoicevoxSynthesizer;
+typedef struct VoicevoxAudioFeature VoicevoxAudioFeature;
 typedef struct VoicevoxUserDict VoicevoxUserDict;
 typedef struct VoicevoxVoiceModelFile VoicevoxVoiceModelFile;
 
@@ -49,6 +50,19 @@ typedef struct VoicevoxLoadVoiceModelOptions {
 typedef struct VoicevoxSynthesisOptions {
     bool enable_interrogative_upspeak;
 } VoicevoxSynthesisOptions;
+
+typedef struct VoicevoxAudioQueryFrameLengthOptions {
+    bool enable_interrogative_upspeak;
+} VoicevoxAudioQueryFrameLengthOptions;
+
+typedef struct VoicevoxAudioFeatureSlice {
+    const struct VoicevoxAudioFeature *audio_feature;
+    uintptr_t start_offset;
+    uintptr_t end;
+    bool end_is_inclusive;
+    bool clamp;
+    bool allow_start_exceeds_end;
+} VoicevoxAudioFeatureSlice;
 
 typedef struct VoicevoxTtsOptions {
     bool enable_interrogative_upspeak;
@@ -93,11 +107,19 @@ void voicevox_open_jtalk_rc_delete(struct OpenJtalkRc *open_jtalk);
 /* ---- Core ---- */
 struct VoicevoxInitializeOptions voicevox_make_default_initialize_options(void);
 const char *voicevox_get_version(void);
+double voicevox_get_frame_rate(void);
 
 /* ---- AudioQuery Utility ---- */
 int32_t voicevox_audio_query_create_from_accent_phrases(
     const char *accent_phrases_json,
     char **output_audio_query_json
+);
+struct VoicevoxAudioQueryFrameLengthOptions
+voicevox_make_default_audio_query_frame_length_options(void);
+int32_t voicevox_audio_query_frame_length(
+    const char *audio_query_json,
+    struct VoicevoxAudioQueryFrameLengthOptions options,
+    uintptr_t *output_frame_length
 );
 int32_t voicevox_audio_query_validate(const char *audio_query_json);
 int32_t voicevox_accent_phrase_validate(const char *accent_phrase_json);
@@ -215,6 +237,57 @@ int32_t voicevox_synthesizer_synthesis(
     uintptr_t *output_wav_length,
     uint8_t **output_wav
 );
+int32_t voicevox_synthesizer_create_audio_feature(
+    const struct VoicevoxSynthesizer *synthesizer,
+    const char *audio_query_json,
+    uint32_t style_id,
+    struct VoicevoxSynthesisOptions options,
+    struct VoicevoxAudioFeature **out_audio_feature
+);
+uintptr_t voicevox_audio_feature_len(
+    const struct VoicevoxAudioFeature *audio_feature
+);
+bool voicevox_audio_feature_is_empty(
+    const struct VoicevoxAudioFeature *audio_feature
+);
+int32_t voicevox_audio_feature_slice(
+    const struct VoicevoxAudioFeature *audio_feature,
+    uintptr_t start_inclusive,
+    uintptr_t end,
+    bool end_is_inclusive,
+    bool clamp,
+    bool allow_start_exceeds_end,
+    struct VoicevoxAudioFeatureSlice *output
+);
+struct VoicevoxAudioFeatureSlice voicevox_audio_feature_slice_new(
+    const struct VoicevoxAudioFeature *audio_feature,
+    bool clamp,
+    bool allow_start_exceeds_end
+);
+int32_t voicevox_audio_feature_slice_len(
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    uintptr_t *output
+);
+int32_t voicevox_audio_feature_slice_is_empty(
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    bool *output
+);
+int32_t voicevox_audio_feature_slice_slice(
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    uintptr_t start_inclusive,
+    uintptr_t end,
+    bool end_is_inclusive,
+    bool clamp,
+    bool allow_start_exceeds_end,
+    struct VoicevoxAudioFeatureSlice *output
+);
+int32_t voicevox_synthesizer_render(
+    const struct VoicevoxSynthesizer *synthesizer,
+    struct VoicevoxAudioFeatureSlice audio_feature_slice,
+    uintptr_t *output_pcm_length,
+    uint8_t **output_pcm
+);
+void voicevox_audio_feature_delete(struct VoicevoxAudioFeature *audio_feature);
 
 struct VoicevoxTtsOptions voicevox_make_default_tts_options(void);
 int32_t voicevox_synthesizer_tts(
@@ -264,8 +337,8 @@ int32_t voicevox_synthesizer_frame_synthesis(
 );
 
 /* ---- Memory management ---- */
-void voicevox_json_free(char *json);
-void voicevox_wav_free(uint8_t *wav);
+void voicevox_string_free(char *string);
+void voicevox_bytes_free(uint8_t *bytes);
 const char *voicevox_error_result_to_message(int32_t result_code);
 
 /* ---- User Dictionary ---- */

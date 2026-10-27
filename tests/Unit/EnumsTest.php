@@ -59,6 +59,9 @@ describe('VoicevoxResultCode', function () {
         expect(VoicevoxResultCode::InvalidAudioQueryError->value)->toBe(14);
         expect(VoicevoxResultCode::InvalidAccentPhraseError->value)->toBe(15);
         expect(VoicevoxResultCode::InvalidModelFormatError->value)->toBe(28);
+        expect(VoicevoxResultCode::StartOutOfBoundsError->value)->toBe(36);
+        expect(VoicevoxResultCode::EndOutOfBoundsError->value)->toBe(37);
+        expect(VoicevoxResultCode::StartExceedsEndError->value)->toBe(38);
     });
 });
 

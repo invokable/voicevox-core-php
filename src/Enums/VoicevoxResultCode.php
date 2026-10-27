@@ -102,6 +102,15 @@ enum VoicevoxResultCode: int
     /** 楽譜とFrameAudioQueryの組み合わせが不正。 */
     case IncompatibleQueriesError = 35;
 
+    /** AudioFeatureSliceの開始位置が範囲外。 */
+    case StartOutOfBoundsError = 36;
+
+    /** AudioFeatureSliceの終了位置が範囲外。 */
+    case EndOutOfBoundsError = 37;
+
+    /** AudioFeatureSliceの開始位置が終了位置を超えている。 */
+    case StartExceedsEndError = 38;
+
     /**
      * 結果コードを確認し、OK以外の場合はVoicevoxExceptionをスローする。
      *
