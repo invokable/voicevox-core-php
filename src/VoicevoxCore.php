@@ -24,6 +24,42 @@ class VoicevoxCore
     }
 
     /**
+     * 1秒あたりのフレーム数を返す。
+     */
+    public function getFrameRate(): float
+    {
+        return VoicevoxFFI::getInstance()->voicevox_get_frame_rate();
+    }
+
+    /**
+     * AudioQueryに対応する音声の総フレーム数を返す。
+     *
+     * @param  string  $audioQueryJson  `AudioQuery`型のJSON。
+     * @param  bool  $enableInterrogativeUpspeak  疑問文の語尾上げを有効にするかどうか。
+     *
+     * @throws VoicevoxException
+     */
+    public function audioQueryFrameLength(
+        string $audioQueryJson,
+        bool $enableInterrogativeUpspeak = true,
+    ): int {
+        $ffi = VoicevoxFFI::getInstance();
+        $options = $ffi->voicevox_make_default_audio_query_frame_length_options();
+        $options->enable_interrogative_upspeak = $enableInterrogativeUpspeak;
+
+        $frameLength = $ffi->new('uintptr_t');
+        $result = $ffi->voicevox_audio_query_frame_length(
+            $audioQueryJson,
+            $options,
+            FFI::addr($frameLength),
+        );
+
+        VoicevoxResultCode::check($result, $ffi);
+
+        return (int) $frameLength->cdata;
+    }
+
+    /**
      * AccentPhrase配列のJSON文字列からAudioQueryをJSON文字列で生成する。
      *
      * @param  string  $accentPhrasesJson  AccentPhrase配列のJSON文字列。
@@ -40,7 +76,7 @@ class VoicevoxCore
         VoicevoxResultCode::check($result, $ffi);
 
         $json = FFI::string($jsonPtr);
-        $ffi->voicevox_json_free($jsonPtr);
+        $ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }

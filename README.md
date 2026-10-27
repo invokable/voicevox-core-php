@@ -15,7 +15,7 @@ This is a package for pure PHP. For general use, the [Laravel version](https://g
 
 - PHP 8.3+
 - `ext-ffi` extension enabled
-- VOICEVOX CORE 0.17+
+- VOICEVOX CORE 0.17.1+
 
 > [!NOTE]
 > PHP FFI is typically disabled in web server environments (e.g., FPM with `ffi.enable=false`). This library is intended for **local CLI use only**.
@@ -129,6 +129,8 @@ Run with:
 php talk.php
 ```
 
+For frame-based PCM rendering, see [`example/streaming-talk.php`](example/streaming-talk.php). The C API exposes AudioFeature creation and range rendering, but not the higher-level `streaming_synthesis` API. Each rendered chunk is raw 16-bit PCM, not a WAV file; this path requires a VVM v2 model.
+
 ## Testing
 
 - `composer run test` runs the default `Unit` testsuite only.
@@ -208,12 +210,29 @@ Main text-to-speech synthesizer.
 | `replacePhonemeLength(string $accentPhrasesJson, int $styleId): string` | Return new accent phrases with updated phoneme length. |
 | `replaceMoraPitch(string $accentPhrasesJson, int $styleId): string` | Return new accent phrases with updated mora pitch. |
 | `synthesis(string $audioQueryJson, int $styleId, bool $enableInterrogativeUpspeak = true): string` | Synthesize speech from an AudioQuery JSON. Returns WAV binary. |
+| `createAudioFeature(string $audioQueryJson, int $styleId, bool $enableInterrogativeUpspeak = true): AudioFeature` | Create the intermediate representation used for frame-based rendering. |
 | `tts(string $text, int $styleId, bool $enableInterrogativeUpspeak = true): string` | Synthesize speech from Japanese text in one step. Returns WAV binary. |
 | `ttsFromKana(string $kana, int $styleId, bool $enableInterrogativeUpspeak = true): string` | Synthesize speech from kana notation. Returns WAV binary. |
 | `createSingFrameAudioQuery(string $scoreJson, int $styleId): string` | Generate a singing synthesis query JSON from a musical score. |
 | `frameSynthesis(string $frameAudioQueryJson, int $styleId): string` | Synthesize singing audio from a frame audio query. Returns WAV binary. |
 | `createSingFrameF0(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | Generate per-frame F0 (fundamental frequency) values as a JSON float array. |
 | `createSingFrameVolume(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | Generate per-frame volume values as a JSON float array. |
+
+### `AudioFeature` and `AudioFeatureSlice`
+
+`AudioFeature` owns the native intermediate representation; slices keep that owner alive. Rendering is synchronous and returns raw 16-bit PCM bytes.
+
+| Class / method | Description |
+|----------------|-------------|
+| `AudioFeature::length(): int` | Return the total number of frames. |
+| `AudioFeature::isEmpty(): bool` | Check whether the feature has no frames. |
+| `AudioFeature::whole(): AudioFeatureSlice` | Get a slice covering the whole feature. |
+| `AudioFeature::slice(int $startInclusive, int $end, bool $endIsInclusive = false, bool $clamp = false, bool $allowStartExceedsEnd = false): AudioFeatureSlice` | Create a frame-range slice. The end is exclusive by default. |
+| `AudioFeature::render(): string` | Render the whole feature as PCM. |
+| `AudioFeatureSlice::length(): int` | Return the number of frames in the slice. |
+| `AudioFeatureSlice::isEmpty(): bool` | Check whether the slice has no frames. |
+| `AudioFeatureSlice::slice(int $startInclusive, int $end, bool $endIsInclusive = false, bool $clamp = false, bool $allowStartExceedsEnd = false): AudioFeatureSlice` | Create a subslice using the same range options. |
+| `AudioFeatureSlice::render(): string` | Render the slice as PCM. |
 
 ---
 
@@ -224,6 +243,8 @@ Global utility functions for VOICEVOX Core.
 | Method | Description |
 |--------|-------------|
 | `getVersion(): string` | Return the VOICEVOX Core version as a SemVer string. |
+| `getFrameRate(): float` | Return the number of audio frames per second (`93.75` in CORE 0.17.1). |
+| `audioQueryFrameLength(string $audioQueryJson, bool $enableInterrogativeUpspeak = true): int` | Return the estimated audio length in frames. |
 | `audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | Generate an AudioQuery JSON from an accent phrase array JSON. |
 | `audioQueryValidate(string $audioQueryJson): void` | Validate an `AudioQuery` JSON. Throws `VoicevoxException` if invalid. |
 | `accentPhraseValidate(string $accentPhraseJson): void` | Validate an `AccentPhrase` JSON. Throws `VoicevoxException` if invalid. |

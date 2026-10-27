@@ -54,7 +54,7 @@ class VoiceModelFile
         $jsonPtr = $this->ffi->voicevox_voice_model_file_create_metas_json($this->handle);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }

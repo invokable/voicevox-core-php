@@ -130,7 +130,7 @@ class Onnxruntime
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }

@@ -76,7 +76,7 @@ class Synthesizer
         $jsonPtr = $this->ffi->voicevox_synthesizer_create_metas_json($this->handle);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -152,7 +152,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -176,7 +176,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -200,7 +200,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -224,7 +224,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -303,10 +303,57 @@ class Synthesizer
 
         VoicevoxResultCode::check($result, $this->ffi);
 
-        $wav = FFI::string($wavPtr, (int) $wavSize->cdata);
-        $this->ffi->voicevox_wav_free($wavPtr);
+        return $this->readBytesAndFree($wavPtr, $wavSize);
+    }
 
-        return $wav;
+    /**
+     * AudioQueryから音声合成用の中間表現を作成する。
+     *
+     * @param  string  $audioQueryJson  AudioQuery（JSON文字列）。
+     * @param  int  $styleId  スタイルID。
+     * @param  bool  $enableInterrogativeUpspeak  疑問文の語尾上げを有効にするかどうか。
+     */
+    public function createAudioFeature(
+        string $audioQueryJson,
+        int $styleId,
+        bool $enableInterrogativeUpspeak = true,
+    ): AudioFeature {
+        $options = $this->ffi->voicevox_make_default_synthesis_options();
+        $options->enable_interrogative_upspeak = $enableInterrogativeUpspeak;
+
+        $audioFeature = $this->ffi->new('struct VoicevoxAudioFeature*');
+        $result = $this->ffi->voicevox_synthesizer_create_audio_feature(
+            $this->handle,
+            $audioQueryJson,
+            $styleId,
+            $options,
+            FFI::addr($audioFeature),
+        );
+
+        VoicevoxResultCode::check($result, $this->ffi);
+
+        return AudioFeature::fromPtr($audioFeature, $this->ffi, $this);
+    }
+
+    /**
+     * AudioFeatureSliceを16-bit PCMとしてrenderする（内部用）。
+     *
+     * @internal
+     */
+    public function renderAudioFeatureSlice(CData $slice): string
+    {
+        $pcmLength = $this->ffi->new('uintptr_t');
+        $pcmPtr = $this->ffi->new('uint8_t*');
+        $result = $this->ffi->voicevox_synthesizer_render(
+            $this->handle,
+            $slice,
+            FFI::addr($pcmLength),
+            FFI::addr($pcmPtr),
+        );
+
+        VoicevoxResultCode::check($result, $this->ffi);
+
+        return $this->readBytesAndFree($pcmPtr, $pcmLength);
     }
 
     /**
@@ -338,10 +385,7 @@ class Synthesizer
 
         VoicevoxResultCode::check($result, $this->ffi);
 
-        $wav = FFI::string($wavPtr, (int) $wavSize->cdata);
-        $this->ffi->voicevox_wav_free($wavPtr);
-
-        return $wav;
+        return $this->readBytesAndFree($wavPtr, $wavSize);
     }
 
     /**
@@ -373,10 +417,7 @@ class Synthesizer
 
         VoicevoxResultCode::check($result, $this->ffi);
 
-        $wav = FFI::string($wavPtr, (int) $wavSize->cdata);
-        $this->ffi->voicevox_wav_free($wavPtr);
-
-        return $wav;
+        return $this->readBytesAndFree($wavPtr, $wavSize);
     }
 
     /**
@@ -398,7 +439,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -424,10 +465,7 @@ class Synthesizer
 
         VoicevoxResultCode::check($result, $this->ffi);
 
-        $wav = FFI::string($wavPtr, (int) $wavSize->cdata);
-        $this->ffi->voicevox_wav_free($wavPtr);
-
-        return $wav;
+        return $this->readBytesAndFree($wavPtr, $wavSize);
     }
 
     /**
@@ -451,7 +489,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -477,7 +515,7 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
     }
@@ -506,9 +544,22 @@ class Synthesizer
         VoicevoxResultCode::check($result, $this->ffi);
 
         $json = FFI::string($jsonPtr);
-        $this->ffi->voicevox_json_free($jsonPtr);
+        $this->ffi->voicevox_string_free($jsonPtr);
 
         return $json;
+    }
+
+    private function readBytesAndFree(CData $bytesPtr, CData $bytesLength): string
+    {
+        if ((int) $bytesLength->cdata === 0) {
+            return '';
+        }
+
+        try {
+            return FFI::string($bytesPtr, (int) $bytesLength->cdata);
+        } finally {
+            $this->ffi->voicevox_bytes_free($bytesPtr);
+        }
     }
 
     /**

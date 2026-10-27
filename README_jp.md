@@ -15,7 +15,7 @@
 
 - PHP 8.3以上
 - `ext-ffi` 拡張が有効であること
-- VOICEVOX CORE 0.17+
+- VOICEVOX CORE 0.17.1以上
 
 > [!NOTE]
 > PHP FFIはWebサーバー環境（FPMなど）では無効にされていることが多いため（`ffi.enable=false`）、このライブラリは**ローカルCLIでの利用を想定**しています。
@@ -130,6 +130,8 @@ echo 'Wrote ' . $outPath . PHP_EOL;
 php talk.php
 ```
 
+フレーム単位でPCMを生成する例は [`example/streaming-talk.php`](example/streaming-talk.php) を参照してください。C APIにはAudioFeatureの作成と範囲renderの機能がありますが、高レベルの `streaming_synthesis` APIはありません。各チャンクの出力はWAVではなく16-bit PCMの生データで、この方法にはVVM v2モデルが必要です。
+
 ## テスト
 
 - `composer run test` はデフォルトの `Unit` testsuite だけを実行します。
@@ -209,12 +211,29 @@ OpenJTalkを使用したテキスト解析器。
 | `replacePhonemeLength(string $accentPhrasesJson, int $styleId): string` | 音素長を変更した新しいアクセント句配列のJSONを返します。 |
 | `replaceMoraPitch(string $accentPhrasesJson, int $styleId): string` | モーラの音高を変更した新しいアクセント句配列のJSONを返します。 |
 | `synthesis(string $audioQueryJson, int $styleId, bool $enableInterrogativeUpspeak = true): string` | AudioQuery JSONから音声合成します。WAVバイナリを返します。 |
+| `createAudioFeature(string $audioQueryJson, int $styleId, bool $enableInterrogativeUpspeak = true): AudioFeature` | フレーム単位のrenderに使う中間表現を作成します。 |
 | `tts(string $text, int $styleId, bool $enableInterrogativeUpspeak = true): string` | 日本語テキストから1ステップで音声合成します。WAVバイナリを返します。 |
 | `ttsFromKana(string $kana, int $styleId, bool $enableInterrogativeUpspeak = true): string` | AquesTalk風記法から音声合成します。WAVバイナリを返します。 |
 | `createSingFrameAudioQuery(string $scoreJson, int $styleId): string` | 楽譜JSONから歌唱音声合成用クエリのJSONを生成します。 |
 | `frameSynthesis(string $frameAudioQueryJson, int $styleId): string` | 歌唱音声合成用クエリから音声合成します。WAVバイナリを返します。 |
 | `createSingFrameF0(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | 楽譜と歌唱クエリからフレームごとのF0（基本周波数）をJSONのfloat配列で返します。 |
 | `createSingFrameVolume(string $scoreJson, string $frameAudioQueryJson, int $styleId): string` | 楽譜と歌唱クエリからフレームごとの音量をJSONのfloat配列で返します。 |
+
+### `AudioFeature` と `AudioFeatureSlice`
+
+`AudioFeature` はネイティブの中間表現を所有し、sliceは所有元を保持します。renderは同期的に実行され、16-bit PCMの生データを返します。
+
+| クラス / メソッド | 説明 |
+|----------------|------|
+| `AudioFeature::length(): int` | 全体のフレーム数を返します。 |
+| `AudioFeature::isEmpty(): bool` | AudioFeatureが空かどうかを返します。 |
+| `AudioFeature::whole(): AudioFeatureSlice` | 全体を表すsliceを返します。 |
+| `AudioFeature::slice(int $startInclusive, int $end, bool $endIsInclusive = false, bool $clamp = false, bool $allowStartExceedsEnd = false): AudioFeatureSlice` | フレーム範囲を表すsliceを作成します。デフォルトでは終了位置を含みません。 |
+| `AudioFeature::render(): string` | 全体をPCMとしてrenderします。 |
+| `AudioFeatureSlice::length(): int` | sliceのフレーム数を返します。 |
+| `AudioFeatureSlice::isEmpty(): bool` | sliceが空かどうかを返します。 |
+| `AudioFeatureSlice::slice(int $startInclusive, int $end, bool $endIsInclusive = false, bool $clamp = false, bool $allowStartExceedsEnd = false): AudioFeatureSlice` | 同じ範囲オプションで部分sliceを作成します。 |
+| `AudioFeatureSlice::render(): string` | sliceをPCMとしてrenderします。 |
 
 ---
 
@@ -225,6 +244,8 @@ VOICEVOX Coreのグローバルユーティリティ関数。
 | メソッド | 説明 |
 |--------|------|
 | `getVersion(): string` | VOICEVOX CoreのバージョンをSemVer文字列で返します。 |
+| `getFrameRate(): float` | 1秒あたりのフレーム数を返します（CORE 0.17.1では`93.75`）。 |
+| `audioQueryFrameLength(string $audioQueryJson, bool $enableInterrogativeUpspeak = true): int` | 音声の推定フレーム数を返します。 |
 | `audioQueryCreateFromAccentPhrases(string $accentPhrasesJson): string` | アクセント句配列JSONからAudioQuery JSONを生成します。 |
 | `audioQueryValidate(string $audioQueryJson): void` | `AudioQuery` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |
 | `accentPhraseValidate(string $accentPhraseJson): void` | `AccentPhrase` JSONを検証します。不正な場合は `VoicevoxException` をスローします。 |

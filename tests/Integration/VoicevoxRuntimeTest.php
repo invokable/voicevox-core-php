@@ -194,6 +194,38 @@ describe('VOICEVOX runtime integration', function () {
             ->and(strlen($ttsFromKanaWav))->toBeGreaterThan(44);
     });
 
+    it('renders audio feature slices as PCM', function () {
+        ['synthesizer' => $synthesizer] = voicevoxRuntimeFixture();
+        $core = new VoicevoxCore;
+
+        $audioQuery = $synthesizer->createAudioQuery('こんにちは', 0);
+        $frameLength = $core->audioQueryFrameLength($audioQuery);
+        $audioFeature = $synthesizer->createAudioFeature($audioQuery, 0);
+
+        expect($core->getFrameRate())->toBe(93.75)
+            ->and($audioFeature->length())->toBe($frameLength)
+            ->and($audioFeature->isEmpty())->toBeFalse();
+
+        $chunkEnd = min(28, $frameLength);
+        $chunk = $audioFeature->slice(0, $chunkEnd);
+        $pcm = $chunk->render();
+
+        expect($chunk->length())->toBe($chunkEnd)
+            ->and($pcm)->not->toBeEmpty()
+            ->and(strlen($pcm) % 2)->toBe(0);
+
+        $emptySlice = $audioFeature->slice($frameLength, $frameLength);
+        expect($emptySlice->isEmpty())->toBeTrue()
+            ->and($emptySlice->render())->toBe('');
+
+        expect(fn () => $audioFeature->slice(0, $frameLength + 1))
+            ->toThrow(VoicevoxException::class);
+        expect(fn () => $audioFeature->slice($frameLength + 1, $frameLength + 1))
+            ->toThrow(VoicevoxException::class);
+        expect(fn () => $audioFeature->slice(2, 1))
+            ->toThrow(VoicevoxException::class);
+    });
+
     it('supports user dictionary lifecycle and openjtalk integration', function () {
         ['openJtalk' => $openJtalk] = voicevoxRuntimeFixture();
 
